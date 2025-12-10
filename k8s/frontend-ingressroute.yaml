@@ -1,0 +1,16 @@
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: about-frontend
+  namespace: about
+spec:
+  entryPoints:
+    - websecure
+  routes:
+    - match: Host(`about.yourdomain.com`)
+      kind: Rule
+      services:
+        - name: about-frontend
+          port: 80
+  tls:
+    certResolver: default

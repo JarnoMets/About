@@ -1,0 +1,48 @@
+apiVersion: v1
+kind: Secret
+metadata:
+  name: about-backend-secret
+  namespace: about
+type: Opaque
+stringData:
+  DATABASE_URL: "postgresql://about_user:changeme@postgres.about-db.svc.cluster.local:5432/about_db"
+  HOST: "0.0.0.0"
+  PORT: "8080"
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: about-backend
+  namespace: about
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: about-backend
+  template:
+    metadata:
+      labels:
+        app: about-backend
+    spec:
+      containers:
+      - name: about-backend
+        image: about-backend:latest
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 8080
+        envFrom:
+        - secretRef:
+            name: about-backend-secret
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: about-backend
+  namespace: about
+spec:
+  selector:
+    app: about-backend
+  ports:
+  - port: 8080
+    targetPort: 8080
+  type: ClusterIP
