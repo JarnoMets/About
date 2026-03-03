@@ -143,5 +143,46 @@
             "http": "reqwest (rustls-tls, async)",
             "targets": "Android (APK) / Desktop"
         }
+    },
+    "kholisa32": {
+        "name": "Kholisa-32",
+        "shortDescription": "Een zelfgebouwde draagbare gameconsole op basis van een STM32F746NG-microcontroller, met een eigen bytecode virtuele machine en rendering op een 4,3\" 480x272 lcd met touchinput.",
+        "description": "Kholisa-32 is een zelfgebouwde draagbare gameconsole gebouwd op het STM32F746G-DISCO discovery board (Cortex-M7, 216 MHz). Games worden geschreven in een eigen assemblagetaal, gecompileerd naar bytecode op een pc en via UART naar het apparaat overgebracht. De virtuele machine voert 32-bit brede instructies uit met 256 algemene registers, een aanroepstack en een volledige instructieset voor rekenkunde, bitsgewijze logica, conditioneel vertakken en tekenen op het scherm. Games worden opgeslagen in 16 MB QSPI NOR-flash en gerenderd via DMA2D naar een SDRAM-framebuffer, weergegeven op het RK043FN48H 4,3\" capacitief aanrakings-lcd.",
+        "features": {
+            "f1": "Eigen bytecode virtuele machine met 256 registers en een 32-bit instructieset",
+            "f2": "4,3\" 480x272 TFT-lcd met capacitieve touchinput (FT5336)",
+            "f3": "16 MB QSPI NOR-flash voor game-opslag; tot 10 games in een touchgebaseerde launcher",
+            "f4": "DMA2D-versnelde rendering naar een SDRAM-framebuffer",
+            "f5": "UART game-uploadprotocol met pakketgebaseerde overdracht en ACK-handshake",
+            "f6": "Tekenprimitivieven: lijnen, rechthoeken, cirkels, afbeeldingen en tekst",
+            "f7": "Gebouwd met STM32CubeIDE met STM32 HAL- en BSP-stuurprogramma's"
+        },
+        "stack": {
+            "mcu": "STM32F746NG — Cortex-M7 @ 216 MHz",
+            "display": "RK043FN48H — 4,3\" 480x272 TFT + FT5336 touch",
+            "flash": "N25Q128A — 16 MB QSPI NOR-flash",
+            "language": "C (firmware) / Eigen assembly (.khl)",
+            "toolchain": "STM32CubeIDE / arm-none-eabi-gcc",
+            "transfer": "UART op 115200 baud"
+        }
+    },
+    "kholisa32Ide": {
+        "name": "Kholisa-32 IDE",
+        "shortDescription": "Een desktop-IDE voor het schrijven, compileren, linken en uploaden van games naar de Kholisa-32-console, gebouwd met Python en PySide2.",
+        "description": "Een Python-desktopapplicatie gebouwd met PySide2 (Qt for Python) voor het ontwikkelen van games voor de Kholisa-32-console. De IDE biedt een broncode-editor voor de eigen .khl-assemblagetaal, een compiler die in twee passes tussenliggende hex-uitvoer produceert, een linker die de definitieve .khr-binary assembleert met header-, pictogram-, sprite- en geluidssecties, en een UART-overdrachtsmodule die binaries via serieel naar het apparaat uploadt. Asset-helpers laten je PNG-pictogrammen en sprites (automatisch geconverteerd naar ARGB1555) en WAV-geluidsbestanden direct vanuit het Build-menu koppelen. Seriële poort en baudrate zijn configureerbaar via het menu Opties en worden opgeslagen in een instellingenbestand.",
+        "features": {
+            "f1": "Broncode-editor voor de .khl eigen assemblagetaal met indicator voor niet-opgeslagen wijzigingen",
+            "f2": "Twee-pass compiler: instructie-encoding en labelresolutie",
+            "f3": "Linker die .khr-binaries produceert met header, pictogram, sprites en geluiden",
+            "f4": "UART-upload met pakketgebaseerde overdracht en ACK-handshake",
+            "f5": "Afbeelding-naar-ARGB1555 converter; pictogrammen automatisch verkleind naar 64x64",
+            "f6": "Configureerbare seriële poort en baudrate, opgeslagen in settings.conf"
+        },
+        "stack": {
+            "language": "Python 3",
+            "gui": "PySide2 (Qt for Python)",
+            "serial": "pyserial",
+            "imaging": "Pillow (PIL)"
+        }
     }
 }

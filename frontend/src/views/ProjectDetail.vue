@@ -117,6 +117,16 @@ const projectsData: Project[] = [
     id: 'musicApp',
     icon: 'MA',
     github: 'https://github.com/JarnoMets/AndroidMusicViewer'
+  },
+  {
+    id: 'kholisa32',
+    icon: 'K32',
+    github: 'https://github.com/JarnoMets/Kholisa32'
+  },
+  {
+    id: 'kholisa32Ide',
+    icon: 'IDE',
+    github: 'https://github.com/JarnoMets/Kholisa32'
   }
 ];
 
