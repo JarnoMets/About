@@ -118,34 +118,35 @@ const projects: Project[] = [
 .projects-header h1 {
   font-size: 2rem;
   font-weight: 700;
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.75rem;
+  color: #e8eaf0;
 }
 
 .projects-subtitle {
   font-size: 1.05rem;
-  opacity: 0.7;
+  color: #a0a8b8;
 }
 
 .projects-list {
   display: flex;
   flex-direction: column;
-  gap: 3rem;
+  gap: 2.5rem;
 }
 
 .project-card {
   display: flex;
   align-items: stretch;
-  gap: 2rem;
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  gap: 0;
+  background: #2a2d35;
+  border: 1px solid #3a3d46;
   border-radius: 12px;
   overflow: hidden;
   transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
 .project-card:hover {
-  border-color: rgba(255, 255, 255, 0.16);
-  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.15);
+  border-color: #505664;
+  box-shadow: 0 6px 32px rgba(0, 0, 0, 0.25);
 }
 
 .project-card.card-reversed {
@@ -153,34 +154,34 @@ const projects: Project[] = [
 }
 
 .card-image {
-  flex: 0 0 280px;
+  flex: 0 0 260px;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(255, 255, 255, 0.03);
 }
 
 .image-placeholder {
   width: 100%;
   height: 100%;
-  min-height: 200px;
+  min-height: 220px;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, rgba(100, 120, 200, 0.12), rgba(100, 200, 180, 0.08));
+  background: linear-gradient(135deg, #323848, #2e3440);
 }
 
 .placeholder-icon {
   font-size: 2.5rem;
   font-weight: 700;
-  opacity: 0.35;
+  color: #6878a8;
+  opacity: 0.5;
   letter-spacing: 0.05em;
   user-select: none;
 }
 
 .card-content {
   flex: 1;
-  padding: 1.75rem 2rem;
+  padding: 2rem 2.25rem;
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -192,21 +193,22 @@ const projects: Project[] = [
 }
 
 .card-title {
-  font-size: 1.4rem;
+  font-size: 1.35rem;
   font-weight: 600;
-  margin-bottom: 0.75rem;
+  margin-bottom: 0.6rem;
+  color: #e0e4ec;
 }
 
 .card-description {
-  font-size: 0.95rem;
-  line-height: 1.6;
-  opacity: 0.75;
+  font-size: 0.92rem;
+  line-height: 1.65;
+  color: #9aa0b0;
   margin-bottom: 1.25rem;
 }
 
 .card-actions {
   display: flex;
-  gap: 0.75rem;
+  gap: 0.6rem;
   flex-wrap: wrap;
 }
 
@@ -216,9 +218,9 @@ const projects: Project[] = [
 
 .btn {
   display: inline-block;
-  padding: 0.5rem 1.1rem;
+  padding: 0.5rem 1rem;
   border-radius: 6px;
-  font-size: 0.85rem;
+  font-size: 0.82rem;
   font-weight: 500;
   text-decoration: none;
   transition: background-color 0.2s ease, border-color 0.2s ease;
@@ -226,61 +228,79 @@ const projects: Project[] = [
 }
 
 .btn-primary {
-  background-color: rgba(100, 120, 200, 0.85);
+  background-color: #5568b4;
   color: #fff;
   border: 1px solid transparent;
 }
 
 .btn-primary:hover {
-  background-color: rgba(100, 120, 200, 1);
+  background-color: #6478c4;
 }
 
 .btn-outline {
   background: transparent;
-  color: inherit;
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #b0b8c8;
+  border: 1px solid #484e5c;
 }
 
 .btn-outline:hover {
-  border-color: rgba(255, 255, 255, 0.4);
+  border-color: #6a7288;
   background: rgba(255, 255, 255, 0.04);
+  color: #d0d4dc;
 }
 
 @media (prefers-color-scheme: light) {
+  .projects-header h1 {
+    color: #1a2030;
+  }
+
+  .projects-subtitle {
+    color: #5a6270;
+  }
+
   .project-card {
-    background: rgba(0, 0, 0, 0.02);
-    border-color: rgba(0, 0, 0, 0.08);
+    background: #f5f6f8;
+    border-color: #dde0e6;
   }
 
   .project-card:hover {
-    border-color: rgba(0, 0, 0, 0.16);
-    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.06);
-  }
-
-  .card-image {
-    background: rgba(0, 0, 0, 0.02);
+    border-color: #c0c6d0;
+    box-shadow: 0 6px 32px rgba(0, 0, 0, 0.08);
   }
 
   .image-placeholder {
-    background: linear-gradient(135deg, rgba(100, 120, 200, 0.08), rgba(100, 200, 180, 0.06));
+    background: linear-gradient(135deg, #e4e8f0, #eaecf2);
+  }
+
+  .placeholder-icon {
+    color: #8090b8;
+  }
+
+  .card-title {
+    color: #1e2636;
+  }
+
+  .card-description {
+    color: #5a6470;
   }
 
   .btn-primary {
-    background-color: rgba(70, 90, 170, 0.9);
+    background-color: #4a5ca0;
   }
 
   .btn-primary:hover {
-    background-color: rgba(70, 90, 170, 1);
+    background-color: #5568b4;
   }
 
   .btn-outline {
-    border-color: rgba(0, 0, 0, 0.2);
-    color: inherit;
+    border-color: #c0c6d0;
+    color: #4a5060;
   }
 
   .btn-outline:hover {
-    border-color: rgba(0, 0, 0, 0.4);
+    border-color: #8a90a0;
     background: rgba(0, 0, 0, 0.03);
+    color: #2a3040;
   }
 }
 
@@ -295,13 +315,13 @@ const projects: Project[] = [
   }
 
   .image-placeholder {
-    min-height: 140px;
+    min-height: 150px;
   }
 
   .card-content,
   .card-reversed .card-content {
     text-align: left;
-    padding: 1.25rem 1.5rem;
+    padding: 1.5rem;
   }
 
   .card-reversed .card-actions {
