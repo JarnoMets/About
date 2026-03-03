@@ -29,14 +29,23 @@ impl EmailService {
             .map(|v| v == "true" || v == "1")
             .unwrap_or(true);
 
+        let smtp_pass = env::var("SMTP_PASS").unwrap_or_else(|_| {
+            std::fs::read_to_string("/app/smtp-key-brevo")
+                .or_else(|_| std::fs::read_to_string("../smtp-key-brevo"))
+                .or_else(|_| std::fs::read_to_string("smtp-key-brevo"))
+                .unwrap_or_default()
+                .trim()
+                .to_string()
+        });
+
         Self {
             smtp_host: env::var("SMTP_HOST").unwrap_or_else(|_| "smtp-relay.brevo.com".to_string()),
             smtp_port: env::var("SMTP_PORT")
                 .ok()
                 .and_then(|p| p.parse().ok())
                 .unwrap_or(587),
-            smtp_user: env::var("SMTP_USER").unwrap_or_default(),
-            smtp_pass: env::var("SMTP_PASS").unwrap_or_default(),
+            smtp_user: env::var("SMTP_USER").unwrap_or_else(|_| "info@jarnomets.com".to_string()),
+            smtp_pass,
             from_email: env::var("EMAIL_FROM").unwrap_or_else(|_| "info@jarnomets.com".to_string()),
             to_email: env::var("EMAIL_TO").unwrap_or_else(|_| "info@jarnomets.com".to_string()),
             enabled,
