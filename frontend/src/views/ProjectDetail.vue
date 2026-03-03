@@ -153,14 +153,13 @@ function formatStackLabel(key: string): string {
   display: inline-block;
   margin-bottom: 2rem;
   font-size: 0.9rem;
-  color: inherit;
-  opacity: 0.6;
+  color: #8890a4;
   text-decoration: none;
-  transition: opacity 0.2s ease;
+  transition: color 0.2s ease;
 }
 
 .back-link:hover {
-  opacity: 1;
+  color: #c0c6d4;
 }
 
 .detail-header {
@@ -181,14 +180,15 @@ function formatStackLabel(key: string): string {
   align-items: center;
   justify-content: center;
   border-radius: 12px;
-  background: linear-gradient(135deg, rgba(100, 120, 200, 0.12), rgba(100, 200, 180, 0.08));
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: linear-gradient(135deg, #323848, #2e3440);
+  border: 1px solid #3a3d46;
 }
 
 .placeholder-icon {
   font-size: 3rem;
   font-weight: 700;
-  opacity: 0.3;
+  color: #6878a8;
+  opacity: 0.5;
   letter-spacing: 0.05em;
   user-select: none;
 }
@@ -202,12 +202,13 @@ function formatStackLabel(key: string): string {
   font-size: 1.8rem;
   font-weight: 700;
   margin-bottom: 1rem;
+  color: #e0e4ec;
 }
 
 .header-description {
   font-size: 0.95rem;
-  line-height: 1.7;
-  opacity: 0.75;
+  line-height: 1.75;
+  color: #9aa0b0;
   margin-bottom: 1.5rem;
 }
 
@@ -229,24 +230,25 @@ function formatStackLabel(key: string): string {
 }
 
 .btn-primary {
-  background-color: rgba(100, 120, 200, 0.85);
+  background-color: #5568b4;
   color: #fff;
   border: 1px solid transparent;
 }
 
 .btn-primary:hover {
-  background-color: rgba(100, 120, 200, 1);
+  background-color: #6478c4;
 }
 
 .btn-outline {
   background: transparent;
-  color: inherit;
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #b0b8c8;
+  border: 1px solid #484e5c;
 }
 
 .btn-outline:hover {
-  border-color: rgba(255, 255, 255, 0.4);
+  border-color: #6a7288;
   background: rgba(255, 255, 255, 0.04);
+  color: #d0d4dc;
 }
 
 .detail-section {
@@ -254,12 +256,13 @@ function formatStackLabel(key: string): string {
 }
 
 .detail-section h2 {
-  font-size: 1.25rem;
+  font-size: 1.2rem;
   font-weight: 600;
-  margin-bottom: 1rem;
-  padding-bottom: 0.5rem;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  margin-bottom: 1.25rem;
+  padding-bottom: 0.6rem;
+  border-bottom: 1px solid #3a3d46;
   text-align: left;
+  color: #c8ccd8;
 }
 
 .features-list {
@@ -268,13 +271,12 @@ function formatStackLabel(key: string): string {
 }
 
 .features-list li {
-  padding: 0.6rem 0;
+  padding: 0.65rem 0 0.65rem 1.25rem;
   font-size: 0.92rem;
-  line-height: 1.5;
-  opacity: 0.8;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+  line-height: 1.55;
+  color: #a0a8b8;
+  border-bottom: 1px solid #2e3138;
   text-align: left;
-  padding-left: 1rem;
   position: relative;
 }
 
@@ -284,10 +286,10 @@ function formatStackLabel(key: string): string {
   left: 0;
   top: 50%;
   transform: translateY(-50%);
-  width: 4px;
-  height: 4px;
+  width: 5px;
+  height: 5px;
   border-radius: 50%;
-  background: rgba(100, 120, 200, 0.6);
+  background: #5568b4;
 }
 
 .features-list li:last-child {
@@ -304,64 +306,96 @@ function formatStackLabel(key: string): string {
   display: flex;
   flex-direction: column;
   padding: 1rem 1.25rem;
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.06);
+  background: #2a2d35;
+  border: 1px solid #3a3d46;
   border-radius: 8px;
   text-align: left;
 }
 
 .stack-label {
-  font-size: 0.75rem;
+  font-size: 0.72rem;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.06em;
-  opacity: 0.5;
-  margin-bottom: 0.35rem;
+  color: #6a7288;
+  margin-bottom: 0.4rem;
 }
 
 .stack-value {
   font-size: 0.9rem;
-  opacity: 0.85;
+  color: #c0c6d4;
 }
 
 @media (prefers-color-scheme: light) {
+  .back-link {
+    color: #5a6478;
+  }
+
+  .back-link:hover {
+    color: #2a3248;
+  }
+
   .image-placeholder {
-    background: linear-gradient(135deg, rgba(100, 120, 200, 0.08), rgba(100, 200, 180, 0.06));
-    border-color: rgba(0, 0, 0, 0.08);
+    background: linear-gradient(135deg, #e4e8f0, #eaecf2);
+    border-color: #dde0e6;
+  }
+
+  .placeholder-icon {
+    color: #8090b8;
+  }
+
+  .header-info h1 {
+    color: #1e2636;
+  }
+
+  .header-description {
+    color: #5a6470;
   }
 
   .detail-section h2 {
-    border-bottom-color: rgba(0, 0, 0, 0.08);
+    border-bottom-color: #dde0e6;
+    color: #2a3040;
   }
 
   .features-list li {
-    border-bottom-color: rgba(0, 0, 0, 0.04);
+    color: #4a5264;
+    border-bottom-color: #eaecf0;
   }
 
   .features-list li::before {
-    background: rgba(70, 90, 170, 0.6);
+    background: #4a5ca0;
   }
 
   .stack-item {
-    background: rgba(0, 0, 0, 0.02);
-    border-color: rgba(0, 0, 0, 0.06);
+    background: #f5f6f8;
+    border-color: #dde0e6;
+  }
+
+  .stack-label {
+    color: #7a8298;
+  }
+
+  .stack-value {
+    color: #2a3248;
   }
 
   .btn-primary {
-    background-color: rgba(70, 90, 170, 0.9);
+    background-color: #4a5ca0;
   }
 
   .btn-primary:hover {
-    background-color: rgba(70, 90, 170, 1);
+    background-color: #5568b4;
   }
 
   .btn-outline {
-    border-color: rgba(0, 0, 0, 0.2);
+    border-color: #c0c6d0;
+    color: #4a5060;
   }
 
   .btn-outline:hover {
-    border-color: rgba(0, 0, 0, 0.4);
+    border-color: #8a90a0;
     background: rgba(0, 0, 0, 0.03);
+    color: #2a3040;
   }
 }
 
