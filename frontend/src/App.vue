@@ -1,10 +1,12 @@
 <template>
   <div id="app">
+    <Navbar />
     <router-view />
   </div>
 </template>
 
 <script setup lang="ts">
+import Navbar from '@/components/Navbar.vue';
 </script>
 
 <style scoped>
@@ -15,4 +17,5 @@
   text-align: center;
   color: #2c3e50;
 }
+
 </style>

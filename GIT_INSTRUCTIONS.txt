@@ -1,0 +1,2 @@
+Always branch of from the dev branch for new features/fixes/refactors
+And then merge when everything compiles succesfully, limiting the warning to a minimum.
