@@ -1,0 +1,147 @@
+{
+    "title": "Projects",
+    "subtitle": "A collection of self-hosted applications and tools I have built and maintain.",
+    "viewDetails": "View details",
+    "visitSite": "Visit site",
+    "sourceCode": "Source code",
+    "techStack": "Tech Stack",
+    "features": "Features",
+    "backToProjects": "Back to projects",
+    "homelab": {
+        "name": "Homelab",
+        "shortDescription": "Self-hosted infrastructure running on a home server, orchestrated with Kubernetes (k3s) and managed with Docker, Traefik, and automated deployment pipelines.",
+        "description": "A personal homelab environment built for learning and running self-hosted services. The infrastructure runs on a dedicated server using Kubernetes (k3s) for container orchestration, Traefik as a reverse proxy and ingress controller, and PostgreSQL databases for persistent storage. All projects are containerised with Docker and deployed via automated scripts and Makefiles. The setup includes SSL certificate management, monitoring, and CI/CD workflows.",
+        "features": {
+            "f1": "Kubernetes (k3s) cluster for container orchestration",
+            "f2": "Traefik reverse proxy with automatic SSL via Let's Encrypt",
+            "f3": "PostgreSQL databases with persistent volume claims",
+            "f4": "Docker-based builds with multi-stage Dockerfiles",
+            "f5": "Automated deployment scripts and Makefiles",
+            "f6": "Monitoring and log aggregation",
+            "f7": "Self-hosted Git and CI/CD pipelines"
+        },
+        "stack": {
+            "infrastructure": "Kubernetes (k3s) / Docker / Traefik",
+            "databases": "PostgreSQL 15",
+            "backends": "Rust (Actix-web 4)",
+            "frontends": "Vue 3 / TypeScript / Vite",
+            "deployment": "Makefiles / Shell scripts / kubectl"
+        }
+    },
+    "cards": {
+        "name": "Cards",
+        "shortDescription": "A self-hosted card-game scoring and leaderboard platform for tracking results across multiple Belgian and Dutch card games, with ELO ratings and player profiles.",
+        "description": "A full-stack scoring platform designed for tracking card game results among friends. Supports Whist, Color Whist, King, Double King, Manille, Press, and Hearts. Each player has a profile with per-game-type ELO ratings, win rates, average scores, and game history. Features a global leaderboard, ELO comparison charts, an admin panel for managing players and recalculating ratings, and optional email notifications for game results.",
+        "features": {
+            "f1": "Multi-game support: Whist, Color Whist, King, Double King, Manille, Press, Hearts",
+            "f2": "Per-game-type ELO rating system with full history and comparison charts",
+            "f3": "Global and per-game leaderboards with win rate, average score, and records",
+            "f4": "Player profiles with game history and ELO graphs",
+            "f5": "Optional SMTP email notifications for game results and daily digests",
+            "f6": "Admin panel for player management, ELO recalculation, and configuration"
+        },
+        "stack": {
+            "backend": "Rust / Actix-web 4 / SQLx",
+            "database": "PostgreSQL 15",
+            "frontend": "Vue 3 / TypeScript / Vite / Chart.js",
+            "deployment": "Docker Compose / Kubernetes (k3s)"
+        }
+    },
+    "cardsApp": {
+        "name": "Cards App",
+        "shortDescription": "A native Android and desktop app that embeds the Cards platform in a fullscreen Tauri WebView with a local rewriting proxy for seamless framing.",
+        "description": "A cross-platform app built with Tauri 2 and Vue 3 that wraps the Cards web application in a native fullscreen WebView. It includes a local HTTP proxy that strips frame-busting headers, rewrites resource URLs, and injects navigation tracking so the embedded site renders and behaves correctly inside the app. Supports Android and desktop platforms with zero extra UI overhead.",
+        "features": {
+            "f1": "Fullscreen embedded view of the Cards web application",
+            "f2": "Local rewriting proxy that strips X-Frame-Options and CSP headers",
+            "f3": "Automatic URL rewriting for resources and CSS",
+            "f4": "Safe-area padding for Android notch and status bar",
+            "f5": "Cross-platform: Android (APK) and desktop (Linux, macOS, Windows)"
+        },
+        "stack": {
+            "frontend": "Vue 3 / TypeScript / Vite",
+            "native": "Tauri 2 (Rust)",
+            "proxy": "tiny_http / reqwest",
+            "targets": "Android (APK) / Desktop"
+        }
+    },
+    "notes": {
+        "name": "Notes",
+        "shortDescription": "A self-hosted productivity suite with a rich-text note editor, Trello-style kanban boards, a calendar, and visual graph diagrams with Google SSO.",
+        "description": "A full-featured self-hosted productivity application combining multiple tools in a single platform. The rich-text editor is powered by Tiptap and supports headings, lists, tables, code blocks, links, images, and file attachments. The kanban board module offers multiple boards with drag-and-drop cards, labels, due dates, and checklists. Includes a calendar with recurring events and a graph module for visual node-and-edge diagrams that can reference notes, boards, or cards. All data is isolated per user with JWT authentication and optional Google OAuth SSO.",
+        "features": {
+            "f1": "Rich-text editor with Tiptap: headings, lists, tables, code blocks, images, attachments",
+            "f2": "Folder organisation with nested folders and full-text search",
+            "f3": "Revision history with diff view",
+            "f4": "Kanban boards with drag-and-drop cards, labels, due dates, and checklists",
+            "f5": "Calendar with recurring events and automation triggers",
+            "f6": "Visual graph diagrams with nodes referencing notes, boards, or cards",
+            "f7": "Google OAuth SSO and per-user data isolation"
+        },
+        "stack": {
+            "backend": "Rust / Actix-web 4 / SQLx",
+            "database": "PostgreSQL 15",
+            "frontend": "Vue 3 / TypeScript / Vite / Tiptap / Pinia / VueDraggable",
+            "deployment": "Docker Compose / Kubernetes (k3s)"
+        }
+    },
+    "notesApp": {
+        "name": "Notes App",
+        "shortDescription": "A native Android and desktop app for the Notes backend, featuring a rich-text editor, folder tree navigation, and Google OAuth sign-in.",
+        "description": "A cross-platform mobile and desktop client for the Notes server built with Tauri 2 and Vue 3. Features the full Tiptap rich-text editor with bold, italic, headings, lists, tables, code blocks, and images. Includes a collapsible folder tree sidebar with drag-and-drop, note search and filtering, attachment viewing, and a settings screen for configuring the API URL. Authentication uses native Android Google Sign-In via a JNI bridge, with a browser redirect fallback on desktop.",
+        "features": {
+            "f1": "Rich-text editor powered by Tiptap with full formatting support",
+            "f2": "Folder tree with nested folders and drag-and-drop",
+            "f3": "Note search, sort, and filter by folder",
+            "f4": "File attachment viewing per note",
+            "f5": "Google OAuth SSO via native Android JNI bridge",
+            "f6": "Dark theme with system-level detection"
+        },
+        "stack": {
+            "frontend": "Vue 3 / TypeScript / Vite / Tiptap / Pinia",
+            "native": "Tauri 2 (Rust)",
+            "http": "reqwest (rustls-tls, async)",
+            "targets": "Android (APK) / Desktop"
+        }
+    },
+    "music": {
+        "name": "Music",
+        "shortDescription": "A self-hosted music library, streaming server, and DJ toolset with YouTube downloading, BPM/key detection, and Rekordbox export.",
+        "description": "A comprehensive self-hosted music management platform built for personal use. Upload and organise audio files with automatic metadata extraction, duplicate detection, and file sync from a mounted directory. Stream tracks directly in the browser via a WaveSurfer.js waveform player. Download from YouTube with real-time progress via Server-Sent Events, manage playlists with Rekordbox XML export, and maintain a clean genre and artist taxonomy with Discogs-based metadata enrichment. Includes BPM detection via aubio, key detection, and an admin panel with audit logging.",
+        "features": {
+            "f1": "Audio upload with automatic metadata extraction and duplicate detection",
+            "f2": "In-browser waveform player powered by WaveSurfer.js",
+            "f3": "YouTube downloading (single and playlist) with real-time progress",
+            "f4": "Playlist management with ZIP and Rekordbox XML export",
+            "f5": "BPM and key detection using aubio and FFT analysis",
+            "f6": "Genre taxonomy with aliases, Discogs enrichment, and metadata suggestion queue",
+            "f7": "Admin panel with audit log, bulk rename, and auto-download scheduler"
+        },
+        "stack": {
+            "backend": "Rust / Actix-web 4 / SQLx",
+            "database": "PostgreSQL 15",
+            "frontend": "Vue 3 / TypeScript / Vite / WaveSurfer.js / Pinia",
+            "audio": "aubio (BPM) / symphonia / rustfft",
+            "deployment": "Docker Compose / Kubernetes (k3s)"
+        }
+    },
+    "musicApp": {
+        "name": "Music App",
+        "shortDescription": "A native Android and desktop app for the Music server with library browsing, streaming, playlist management, and a two-deck DJ mixing interface.",
+        "description": "A cross-platform mobile and desktop client for the MusicServer backend built with Tauri 2 and Vue 3. Browse the full music library with search, artist, and genre filters. Stream tracks with a persistent bottom player bar featuring play, pause, seek, shuffle, and queue management. Includes an artist browser, playlist viewer, and a two-deck DJ mixing interface where tracks can be loaded from the library onto individual decks with independent playback controls. Authentication via native Android Google Sign-In with a configurable API URL.",
+        "features": {
+            "f1": "Library browsing with search, artist, and genre filters",
+            "f2": "Persistent player bar with play, pause, seek, shuffle, and queue",
+            "f3": "Full track streaming from the Music server backend",
+            "f4": "Artist browser and playlist viewer",
+            "f5": "Two-deck DJ mixing interface with independent controls",
+            "f6": "Google OAuth SSO via native Android JNI bridge"
+        },
+        "stack": {
+            "frontend": "Vue 3 / TypeScript / Vite / Pinia",
+            "native": "Tauri 2 (Rust)",
+            "http": "reqwest (rustls-tls, async)",
+            "targets": "Android (APK) / Desktop"
+        }
+    }
+}

@@ -1,0 +1,147 @@
+{
+    "title": "Projecten",
+    "subtitle": "Een verzameling zelfgehoste applicaties en tools die ik heb gebouwd en onderhoud.",
+    "viewDetails": "Bekijk details",
+    "visitSite": "Bezoek site",
+    "sourceCode": "Broncode",
+    "techStack": "Technologiestack",
+    "features": "Functionaliteiten",
+    "backToProjects": "Terug naar projecten",
+    "homelab": {
+        "name": "Homelab",
+        "shortDescription": "Zelfgehoste infrastructuur op een thuisserver, georkestreerd met Kubernetes (k3s) en beheerd met Docker, Traefik en geautomatiseerde deployment-pipelines.",
+        "description": "Een persoonlijke homelab-omgeving gebouwd om te leren en zelfgehoste diensten te draaien. De infrastructuur draait op een dedicated server met Kubernetes (k3s) voor containerorkestratie, Traefik als reverse proxy en ingress controller, en PostgreSQL-databases voor persistente opslag. Alle projecten zijn gecontaineriseerd met Docker en uitgerold via geautomatiseerde scripts en Makefiles. De setup omvat SSL-certificaatbeheer, monitoring en CI/CD-workflows.",
+        "features": {
+            "f1": "Kubernetes (k3s) cluster voor containerorkestratie",
+            "f2": "Traefik reverse proxy met automatische SSL via Let's Encrypt",
+            "f3": "PostgreSQL-databases met persistent volume claims",
+            "f4": "Docker-gebaseerde builds met multi-stage Dockerfiles",
+            "f5": "Geautomatiseerde deployment-scripts en Makefiles",
+            "f6": "Monitoring en logaggregatie",
+            "f7": "Zelfgehoste Git- en CI/CD-pipelines"
+        },
+        "stack": {
+            "infrastructure": "Kubernetes (k3s) / Docker / Traefik",
+            "databases": "PostgreSQL 15",
+            "backends": "Rust (Actix-web 4)",
+            "frontends": "Vue 3 / TypeScript / Vite",
+            "deployment": "Makefiles / Shell scripts / kubectl"
+        }
+    },
+    "cards": {
+        "name": "Cards",
+        "shortDescription": "Een zelfgehost kaartspel-score- en ranglijstplatform voor het bijhouden van resultaten van meerdere Belgische en Nederlandse kaartspelen, met ELO-ratings en spelersprofielen.",
+        "description": "Een full-stack scoreplatform ontworpen voor het bijhouden van kaartspelresultaten onder vrienden. Ondersteunt Whist, Kleurwhist, Koning, Dubbelkoning, Manille, Pesten en Hartenjagen. Elke speler heeft een profiel met ELO-ratings per speltype, winstpercentages, gemiddelde scores en spelgeschiedenis. Bevat een globaal klassement, ELO-vergelijkingsgrafieken, een beheerderspaneel voor spelerbeheer en herberekening van ratings, en optionele e-mailmeldingen voor spelresultaten.",
+        "features": {
+            "f1": "Ondersteuning voor meerdere spelen: Whist, Kleurwhist, Koning, Dubbelkoning, Manille, Pesten, Hartenjagen",
+            "f2": "ELO-ratingsysteem per speltype met volledige geschiedenis en vergelijkingsgrafieken",
+            "f3": "Globale en per-spel ranglijsten met winstpercentage, gemiddelde score en records",
+            "f4": "Spelersprofielen met spelgeschiedenis en ELO-grafieken",
+            "f5": "Optionele SMTP-e-mailmeldingen voor spelresultaten en dagelijkse samenvattingen",
+            "f6": "Beheerderspaneel voor spelerbeheer, ELO-herberekening en configuratie"
+        },
+        "stack": {
+            "backend": "Rust / Actix-web 4 / SQLx",
+            "database": "PostgreSQL 15",
+            "frontend": "Vue 3 / TypeScript / Vite / Chart.js",
+            "deployment": "Docker Compose / Kubernetes (k3s)"
+        }
+    },
+    "cardsApp": {
+        "name": "Cards App",
+        "shortDescription": "Een native Android- en desktop-app die het Cards-platform inbedt in een fullscreen Tauri WebView met een lokale herschrijvingsproxy voor naadloze weergave.",
+        "description": "Een cross-platform app gebouwd met Tauri 2 en Vue 3 die de Cards-webapplicatie verpakt in een native fullscreen WebView. Bevat een lokale HTTP-proxy die frame-blokkerende headers verwijdert, resource-URL's herschrijft en navigatietracking injecteert zodat de ingebedde site correct rendert en functioneert binnen de app. Ondersteunt Android en desktop-platformen zonder extra UI-overhead.",
+        "features": {
+            "f1": "Fullscreen ingebedde weergave van de Cards-webapplicatie",
+            "f2": "Lokale herschrijvingsproxy die X-Frame-Options en CSP-headers verwijdert",
+            "f3": "Automatische URL-herschrijving voor resources en CSS",
+            "f4": "Safe-area padding voor Android-notch en statusbalk",
+            "f5": "Cross-platform: Android (APK) en desktop (Linux, macOS, Windows)"
+        },
+        "stack": {
+            "frontend": "Vue 3 / TypeScript / Vite",
+            "native": "Tauri 2 (Rust)",
+            "proxy": "tiny_http / reqwest",
+            "targets": "Android (APK) / Desktop"
+        }
+    },
+    "notes": {
+        "name": "Notes",
+        "shortDescription": "Een zelfgehoste productiviteitssuite met een rich-text notitie-editor, Trello-achtige kanban-borden, een kalender en visuele grafiekdiagrammen met Google SSO.",
+        "description": "Een uitgebreide zelfgehoste productiviteitsapplicatie die meerdere tools combineert in een enkel platform. De rich-text editor wordt aangedreven door Tiptap en ondersteunt koppen, lijsten, tabellen, codeblokken, links, afbeeldingen en bestandsbijlagen. De kanban-bordmodule biedt meerdere borden met drag-and-drop kaarten, labels, deadlines en checklists. Bevat een kalender met terugkerende evenementen en een grafiekmodule voor visuele node-en-rand diagrammen die kunnen verwijzen naar notities, borden of kaarten. Alle gegevens zijn geisoleerd per gebruiker met JWT-authenticatie en optionele Google OAuth SSO.",
+        "features": {
+            "f1": "Rich-text editor met Tiptap: koppen, lijsten, tabellen, codeblokken, afbeeldingen, bijlagen",
+            "f2": "Mappenorganisatie met geneste mappen en volledige tekstzoekopdracht",
+            "f3": "Revisiegeschiedenis met diff-weergave",
+            "f4": "Kanban-borden met drag-and-drop kaarten, labels, deadlines en checklists",
+            "f5": "Kalender met terugkerende evenementen en automatiseringstriggers",
+            "f6": "Visuele grafiekdiagrammen met nodes die verwijzen naar notities, borden of kaarten",
+            "f7": "Google OAuth SSO en per-gebruiker gegevensisolatie"
+        },
+        "stack": {
+            "backend": "Rust / Actix-web 4 / SQLx",
+            "database": "PostgreSQL 15",
+            "frontend": "Vue 3 / TypeScript / Vite / Tiptap / Pinia / VueDraggable",
+            "deployment": "Docker Compose / Kubernetes (k3s)"
+        }
+    },
+    "notesApp": {
+        "name": "Notes App",
+        "shortDescription": "Een native Android- en desktop-app voor de Notes-backend, met een rich-text editor, mappenboomnavigatie en Google OAuth-aanmelding.",
+        "description": "Een cross-platform mobiele en desktop-client voor de Notes-server gebouwd met Tauri 2 en Vue 3. Bevat de volledige Tiptap rich-text editor met vet, cursief, koppen, lijsten, tabellen, codeblokken en afbeeldingen. Inclusief een inklapbare mappenboom-zijbalk met drag-and-drop, zoeken en filteren van notities, bijlageweergave en een instellingenscherm voor het configureren van de API-URL. Authenticatie gebruikt native Android Google Sign-In via een JNI-bridge, met een browser-redirect-fallback op desktop.",
+        "features": {
+            "f1": "Rich-text editor aangedreven door Tiptap met volledige opmaakondersteuning",
+            "f2": "Mappenboom met geneste mappen en drag-and-drop",
+            "f3": "Notities zoeken, sorteren en filteren op map",
+            "f4": "Bestandsbijlagen bekijken per notitie",
+            "f5": "Google OAuth SSO via native Android JNI-bridge",
+            "f6": "Donker thema met systeemniveau-detectie"
+        },
+        "stack": {
+            "frontend": "Vue 3 / TypeScript / Vite / Tiptap / Pinia",
+            "native": "Tauri 2 (Rust)",
+            "http": "reqwest (rustls-tls, async)",
+            "targets": "Android (APK) / Desktop"
+        }
+    },
+    "music": {
+        "name": "Music",
+        "shortDescription": "Een zelfgehoste muziekbibliotheek, streamingserver en DJ-toolset met YouTube-downloads, BPM/toonsoortdetectie en Rekordbox-export.",
+        "description": "Een uitgebreid zelfgehost muziekbeheerplatform gebouwd voor persoonlijk gebruik. Upload en organiseer audiobestanden met automatische metadata-extractie, duplicaatdetectie en bestandssynchronisatie vanuit een gemounte map. Stream nummers rechtstreeks in de browser via een WaveSurfer.js golfvormspeler. Download van YouTube met realtime voortgang via Server-Sent Events, beheer afspeellijsten met Rekordbox XML-export en onderhoud een schone genre- en artiesttaxonomie met Discogs-gebaseerde metadata-verrijking. Inclusief BPM-detectie via aubio, toonsoortdetectie en een beheerderspaneel met auditlogging.",
+        "features": {
+            "f1": "Audio-upload met automatische metadata-extractie en duplicaatdetectie",
+            "f2": "Golfvormspeler in de browser aangedreven door WaveSurfer.js",
+            "f3": "YouTube-downloads (enkel en afspeellijst) met realtime voortgang",
+            "f4": "Afspeellijstbeheer met ZIP- en Rekordbox XML-export",
+            "f5": "BPM- en toonsoortdetectie met aubio en FFT-analyse",
+            "f6": "Genretaxonomie met aliassen, Discogs-verrijking en metadata-suggestiewachtrij",
+            "f7": "Beheerderspaneel met auditlog, bulk hernoemen en auto-downloadplanner"
+        },
+        "stack": {
+            "backend": "Rust / Actix-web 4 / SQLx",
+            "database": "PostgreSQL 15",
+            "frontend": "Vue 3 / TypeScript / Vite / WaveSurfer.js / Pinia",
+            "audio": "aubio (BPM) / symphonia / rustfft",
+            "deployment": "Docker Compose / Kubernetes (k3s)"
+        }
+    },
+    "musicApp": {
+        "name": "Music App",
+        "shortDescription": "Een native Android- en desktop-app voor de Music-server met bibliotheekbrowsing, streaming, afspeellijstbeheer en een twee-deck DJ-mixinterface.",
+        "description": "Een cross-platform mobiele en desktop-client voor de MusicServer-backend gebouwd met Tauri 2 en Vue 3. Blader door de volledige muziekbibliotheek met zoek-, artiest- en genrefilters. Stream nummers met een persistente onderspelerbalk met afspelen, pauzeren, zoeken, shuffle en wachtrijbeheer. Bevat een artiestenbrowser, afspeellijstviewer en een twee-deck DJ-mixinterface waar nummers uit de bibliotheek op individuele decks geladen kunnen worden met onafhankelijke afspeelbesturing. Authenticatie via native Android Google Sign-In met een configureerbare API-URL.",
+        "features": {
+            "f1": "Bibliotheekbrowsing met zoek-, artiest- en genrefilters",
+            "f2": "Persistente spelerbalk met afspelen, pauzeren, zoeken, shuffle en wachtrij",
+            "f3": "Volledige nummerstreaming vanuit de Music-serverbackend",
+            "f4": "Artiestenbrowser en afspeellijstviewer",
+            "f5": "Twee-deck DJ-mixinterface met onafhankelijke besturing",
+            "f6": "Google OAuth SSO via native Android JNI-bridge"
+        },
+        "stack": {
+            "frontend": "Vue 3 / TypeScript / Vite / Pinia",
+            "native": "Tauri 2 (Rust)",
+            "http": "reqwest (rustls-tls, async)",
+            "targets": "Android (APK) / Desktop"
+        }
+    }
+}
