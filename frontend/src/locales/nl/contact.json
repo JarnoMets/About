@@ -6,9 +6,15 @@
     "linkedin_label": "LinkedIn",
     "form_name": "Volledige Naam",
     "form_email": "E-mailadres",
+    "form_phone": "Telefoonnummer (Optioneel)",
     "form_message": "Uw Bericht",
     "form_submit": "Bericht Verzenden",
     "form_sending": "Verzenden...",
     "form_success": "Bedankt! Uw bericht is verzonden.",
-    "form_error": "Oeps! Er is iets misgegaan. Probeer het later opnieuw."
+    "form_error": "Oeps! Er is iets misgegaan. Probeer het later opnieuw.",
+    "validation": {
+        "required": "Dit veld is verplicht",
+        "email": "Voer een geldig e-mailadres in",
+        "phone": "Voer een geldig telefoonnummer in"
+    }
 }

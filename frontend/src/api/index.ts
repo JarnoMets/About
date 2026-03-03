@@ -3,6 +3,7 @@ const API_URL = import.meta.env.VITE_API_URL || '/api';
 export interface ContactForm {
   name: string;
   email: string;
+  phone?: string;
   message: string;
 }
 
