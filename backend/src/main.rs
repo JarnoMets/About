@@ -2,7 +2,6 @@ use actix_web::{web, App, HttpServer, HttpResponse};
 use actix_cors::Cors;
 use std::env;
 
-mod db;
 mod models;
 mod routes;
 mod services;
@@ -12,10 +11,7 @@ async fn main() -> std::io::Result<()> {
     env_logger::init();
     dotenv::dotenv().ok();
 
-    let database_url = env::var("DATABASE_URL")
-        .expect("DATABASE_URL must be set");
-    
-    let pool = db::create_pool(&database_url).await;
+    let email_service = services::EmailService::from_env();
 
     let host = env::var("HOST").unwrap_or_else(|_| "0.0.0.0".to_string());
     let port = env::var("PORT").unwrap_or_else(|_| "8080".to_string());
@@ -32,7 +28,7 @@ async fn main() -> std::io::Result<()> {
 
         App::new()
             .wrap(cors)
-            .app_data(web::Data::new(pool.clone()))
+            .app_data(web::Data::new(email_service.clone()))
             .configure(routes::configure)
             .route("/health", web::get().to(|| async { HttpResponse::Ok().body("OK") }))
     })

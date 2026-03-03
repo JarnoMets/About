@@ -1,1 +1,3 @@
-// Add your services here
+pub mod email;
+
+pub use email::EmailService;

@@ -3,7 +3,7 @@ use chrono::{DateTime, Utc};
 
 // Add your models here
 #[allow(dead_code)]
-#[derive(Debug, Serialize, Deserialize, sqlx::FromRow)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct Example {
     pub id: i32,
     pub name: String,
