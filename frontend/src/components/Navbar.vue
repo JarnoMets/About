@@ -107,20 +107,25 @@ const closeMenu = () => {
 }
 
 .navbar li {
-  padding: 1.5rem 0;
+  /* remove padding from li so the anchor can fill the whole row */
+  padding: 0;
 }
 
-.navbar li:hover {
-  background-color: #555;
-}
-
+/* Make the router-link (<a>) fill the full row so the whole area is clickable */
 .navbar a {
+  display: block;
+  width: 100%;
+  padding: 1.5rem 0;
   color: white;
   text-decoration: none;
   font-size: 1.2rem;
 }
 
-.navbar a:hover {
-  text-decoration: underline;
+/* Apply hover/focus states to the link (not the li) for correct clickable area */
+.navbar a:hover,
+.navbar a:focus {
+  background-color: #555;
+  text-decoration: none;
+  outline: none;
 }
 </style>

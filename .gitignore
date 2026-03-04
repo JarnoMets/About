@@ -15,6 +15,10 @@ build/
 .env.local
 .env.*.local
 
+# Personal data
+smtp-key-brevo
+GIT_INSTRUCTIONS.txt
+
 # Logs
 logs/
 *.log
