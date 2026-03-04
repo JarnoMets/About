@@ -6,17 +6,23 @@ import contactEn from './locales/en/contact.json';
 import contactNl from './locales/nl/contact.json';
 import projectsEn from './locales/en/projects.json';
 import projectsNl from './locales/nl/projects.json';
+import pagesEn from './locales/en/pages.json';
+import pagesNl from './locales/nl/pages.json';
 
 const messages = {
     en: {
         contact: contactEn,
         navbar: navbarEn,
-        projects: projectsEn
+        projects: projectsEn,
+        home: pagesEn.home,
+        cv: pagesEn.cv
     },
     nl: {
         contact: contactNl,
         navbar: navbarNl,
-        projects: projectsNl
+        projects: projectsNl,
+        home: pagesNl.home,
+        cv: pagesNl.cv
     }
 };
 
