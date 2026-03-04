@@ -2,7 +2,7 @@
   <div class="home">
     <section class="hero">
       <h1 class="hero-title">Jarno Mets</h1>
-      <p class="hero-sub">Software Developer &amp; Homelab Enthusiast</p>
+      <p class="hero-sub">Software Developer</p>
       <div class="hero-actions">
         <router-link to="/projects" class="btn btn-primary">Projects</router-link>
         <router-link to="/contact"  class="btn btn-outline">Get in touch</router-link>

@@ -34,13 +34,21 @@ const closeMenu = () => {
 
 <style scoped>
 .nav-controls {
-  position: fixed;
-  top: 1rem;
-  right: 1rem;
-  z-index: 1001;
+    /* place the controls inside the main app shell so they inherit the
+      same translucent backdrop and visual weight as `#app` */
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    z-index: 3;
   display: flex;
   align-items: center;
   gap: 1rem;
+  /* match the main app shell so the top controls visually blend in */
+  background: rgba(6, 8, 12, 0.6);
+  padding: 0.4rem;
+  border-radius: 8px;
+  box-shadow: 0 6px 14px rgba(0,0,0,0.35);
+  backdrop-filter: blur(6px);
 }
 
 .hamburger {
@@ -71,6 +79,14 @@ const closeMenu = () => {
   }
 }
 
+@media (prefers-color-scheme: light) {
+  /* lighter translucent shell when the user prefers light theme */
+  .nav-controls {
+    background: rgba(255,255,255,0.75);
+    box-shadow: 0 6px 14px rgba(0,0,0,0.08);
+  }
+}
+
 .is-active .line:nth-child(1) {
   transform: rotate(45deg);
 }
@@ -91,7 +107,7 @@ const closeMenu = () => {
   width: 250px;
   background-color: #333;
   color: white;
-  padding: 4rem 2rem;
+  padding: 0 0;
   z-index: 1000;
   transform: translateX(100%);
   transition: transform 0.3s ease-in-out;
@@ -111,11 +127,16 @@ const closeMenu = () => {
   padding: 0;
 }
 
-/* Make the router-link (<a>) fill the full row so the whole area is clickable */
+/* Make the router-link (<a>) fill the full row so the whole area is clickable.
+   Add horizontal padding (left/right) inside the link so the text doesn't hug
+   the left edge while keeping the hover background spanning the full width. */
 .navbar a {
   display: block;
   width: 100%;
-  padding: 1.5rem 0;
+  /* include padding inside the element width to avoid overflow */
+  box-sizing: border-box;
+  /* vertical padding then horizontal padding (top/bottom right/left) */
+  padding: 1.5rem 1rem;
   color: white;
   text-decoration: none;
   font-size: 1.2rem;

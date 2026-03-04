@@ -22,14 +22,30 @@
 
 html, body {
   min-height: 100vh;
+  margin: 0;
+  padding: 0;
   /* keep body background transparent so the fixed canvas behind #app shows */
   background: transparent;
 }
 
 #app {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 2rem;
+  /* Fill the full window width instead of constraining to a centered max-width */
+  width: 100%;
+  max-width: none;
+  margin: 0;
+}
+
+/* Make the main app shell slightly translucent and darker so text
+   remains readable over the animated WebGPU background. This keeps
+   the background visible but ensures strong contrast for content. */
+#app {
+  /* Keep the translucent background and full-height behavior, ensure full-width */
+  background: rgba(6, 8, 12, 0.6);
+  width: 100%;
+  max-width: none;
+  min-height: 100vh;
+  padding: 0;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.45);
 }
 
 @media (prefers-color-scheme: light) {

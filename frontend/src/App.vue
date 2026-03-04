@@ -38,7 +38,8 @@ onUnmounted(() => {
   inset: 0;
   width: 100%;
   height: 100%;
-  z-index: 0;
+  /* ensure the animated canvas stays behind all UI chrome */
+  z-index: -1;
   pointer-events: none;
 }
 
