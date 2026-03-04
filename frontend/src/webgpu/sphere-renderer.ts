@@ -341,108 +341,93 @@ export async function initSphereRenderer(canvas: HTMLCanvasElement): Promise<() 
   });
   observer.observe(canvas);
 
-  // ── Mouse / touch interaction ────────────────────────────────────────────────
+  // ── Cursor-reactive rotation ─────────────────────────────────────────────────
+  //
+  // No clicking required. The cursor position relative to the viewport centre
+  // continuously steers the torus:
+  //   • angle of cursor from centre  → rotation axis (perpendicular to the
+  //                                     cursor direction, in view space)
+  //   • distance from centre (0–1)   → speed multiplier on top of auto-spin
+  //
+  // All values are EMA-smoothed so the torus eases toward the target.
 
-  /** Accumulated user-driven orientation quaternion (starts at identity). */
-  let userQuat: Quat = quatIdentity();
-  /** Momentum: angular velocity as a [ax, ay, az, speed] tuple. */
-  let momentumAxis  = [0, 1, 0];
-  let momentumSpeed = 0;
+  /** Raw target: normalised cursor vector [-1,1] × [-1,1]. null = no cursor. */
+  let targetCX = 0;
+  let targetCY = 0;
+  /** Smoothed cursor influence (EMA). */
+  let smoothCX = 0;
+  let smoothCY = 0;
+  // EMA factor: higher = faster response (0.04 feels like a gentle follow)
+  const CURSOR_EMA = 0.04;
+  // Maximum extra speed added when cursor is at the edge (distance=1)
+  const MAX_CURSOR_SPEED = 2.5;
 
-  let pointerDown  = false;
-  let lastX        = 0;
-  let lastY        = 0;
-  /** Velocity samples for inertia. */
-  let velX         = 0;
-  let velY         = 0;
-
-  const DRAG_SENSITIVITY = 0.005;
-  const INERTIA_DECAY    = 0.92;
-
-  function onPointerDown(e: PointerEvent) {
-    pointerDown  = true;
-    lastX        = e.clientX;
-    lastY        = e.clientY;
-    velX         = 0;
-    velY         = 0;
-    momentumSpeed = 0;
-    canvas.setPointerCapture(e.pointerId);
-    e.preventDefault();
+  function onMouseMove(e: MouseEvent) {
+    // Normalise to [-1, 1] relative to the full viewport so the effect works
+    // even though the canvas is a background element.
+    targetCX =  (e.clientX / window.innerWidth  - 0.5) * 2;
+    targetCY = -(e.clientY / window.innerHeight - 0.5) * 2; // Y up
   }
 
-  function onPointerMove(e: PointerEvent) {
-    if (!pointerDown) return;
-    const dx = e.clientX - lastX;
-    const dy = e.clientY - lastY;
-    lastX = e.clientX;
-    lastY = e.clientY;
-
-    // Smooth velocity with EMA
-    velX = velX * 0.6 + dx * 0.4;
-    velY = velY * 0.6 + dy * 0.4;
-
-    // Horizontal drag → rotate around world-Y axis
-    // Vertical   drag → rotate around world-X axis
-    // Combined gives an arbitrary-axis rotation matching the trackball feel.
-    const angle = Math.sqrt(dx*dx + dy*dy) * DRAG_SENSITIVITY;
-    if (angle < 1e-9) return;
-    // Rotation axis is perpendicular to drag direction (in view space)
-    const ax =  dy / (Math.sqrt(dx*dx + dy*dy) || 1);
-    const ay =  dx / (Math.sqrt(dx*dx + dy*dy) || 1);
-    const dq = quatFromAxisAngle(ax, ay, 0, angle);
-    userQuat = quatNorm(quatMul(dq, userQuat));
-    e.preventDefault();
+  function onMouseLeave() {
+    targetCX = 0;
+    targetCY = 0;
   }
 
-  function onPointerUp(e: PointerEvent) {
-    if (!pointerDown) return;
-    pointerDown = false;
-    // Transfer last velocity to momentum
-    const speed = Math.sqrt(velX*velX + velY*velY) * DRAG_SENSITIVITY;
-    if (speed > 1e-4) {
-      const len = Math.sqrt(velX*velX + velY*velY);
-      momentumAxis  = [ velY / len,  velX / len, 0];
-      momentumSpeed = speed;
-    }
-    e.preventDefault();
-  }
-
-  canvas.addEventListener('pointerdown', onPointerDown, { passive: false });
-  canvas.addEventListener('pointermove', onPointerMove, { passive: false });
-  canvas.addEventListener('pointerup',   onPointerUp,   { passive: false });
-  canvas.style.cursor = 'grab';
+  document.addEventListener('mousemove',  onMouseMove);
+  document.addEventListener('mouseleave', onMouseLeave);
 
   // ── Render loop ──────────────────────────────────────────────────────────────
 
   const eye: [number, number, number] = [0, 1.5, 3.5];
   let rafId: number;
   const startMs = performance.now();
+  let lastFrameMs = performance.now();
+
+  // Accumulated orientation driven by cursor (separate from auto-spin so it
+  // doesn't fight the time-based angle offset).
+  let cursorQuat: Quat = quatIdentity();
 
   function frame() {
-    const t = (performance.now() - startMs) / 1000;
+    const nowMs  = performance.now();
+    const dt     = Math.min((nowMs - lastFrameMs) / 1000, 0.1); // cap at 100 ms
+    lastFrameMs  = nowMs;
+    const t      = (nowMs - startMs) / 1000;
 
-    // Apply inertia momentum
-    if (!pointerDown && momentumSpeed > 1e-5) {
-      const dq = quatFromAxisAngle(
-        momentumAxis[0], momentumAxis[1], momentumAxis[2],
-        momentumSpeed,
-      );
-      userQuat      = quatNorm(quatMul(dq, userQuat));
-      momentumSpeed *= INERTIA_DECAY;
+    // ── Smooth cursor influence ──────────────────────────────────────────────
+    smoothCX += (targetCX - smoothCX) * CURSOR_EMA;
+    smoothCY += (targetCY - smoothCY) * CURSOR_EMA;
+
+    // Distance from centre (clamped 0–1); drives speed boost
+    const dist  = Math.min(Math.sqrt(smoothCX * smoothCX + smoothCY * smoothCY), 1.0);
+    // Angle of cursor vector → rotation axis perpendicular to it
+    // cursor pointing right  (+x) → axis is +Y  (spin upward)
+    // cursor pointing up     (+y) → axis is -X  (tilt forward)
+    const curLen = Math.sqrt(smoothCX * smoothCX + smoothCY * smoothCY);
+    if (curLen > 1e-4) {
+      // Perpendicular to (cx, cy) in the XY plane is (-cy, cx)
+      const axisX = -smoothCY / curLen;
+      const axisY =  smoothCX / curLen;
+      // Speed scales with distance; multiply by dt so it's frame-rate independent
+      const spinSpeed = dist * MAX_CURSOR_SPEED * backgroundFilter.speed;
+      const dq = quatFromAxisAngle(axisX, axisY, 0, spinSpeed * dt);
+      cursorQuat = quatNorm(quatMul(dq, cursorQuat));
     }
 
     const aspect = canvas.width / canvas.height;
     const proj   = perspective(Math.PI / 4, aspect, 0.1, 100.0);
     const view   = lookAt(eye, [0, 0, 0], [0, 1, 0]);
-    // Auto-spin
-    const slantX = rotateX(Math.PI / 6);
-    const slantZ = rotateZ(Math.PI / 8);
-    const spinY  = rotateY(t * 1.2 * backgroundFilter.speed);
-    const autoModel  = mat4Mul(mat4Mul(spinY, slantX), slantZ);
-    // Layer user-driven orientation on top of the auto-spin
-    const userMat = quatToMat4(userQuat);
-    const model   = mat4Mul(userMat, autoModel);
-    const mvp     = mat4Mul(mat4Mul(proj, view), model);
+
+    // Auto-spin (always present, modulated by speed filter)
+    const slantX    = rotateX(Math.PI / 6);
+    const slantZ    = rotateZ(Math.PI / 8);
+    const spinY     = rotateY(t * 1.2 * backgroundFilter.speed);
+    const autoModel = mat4Mul(mat4Mul(spinY, slantX), slantZ);
+
+    // Layer cursor-driven orientation on top
+    const cursorMat = quatToMat4(cursorQuat);
+    const model     = mat4Mul(cursorMat, autoModel);
+    const mvp       = mat4Mul(mat4Mul(proj, view), model);
 
     const { opacity, color } = backgroundFilter;
     // pack uniforms: mvp (16), model (16), lightPos (4), viewPos (4), tint (4)
@@ -489,10 +474,8 @@ export async function initSphereRenderer(canvas: HTMLCanvasElement): Promise<() 
   return () => {
     cancelAnimationFrame(rafId);
     observer.disconnect();
-    canvas.removeEventListener('pointerdown', onPointerDown);
-    canvas.removeEventListener('pointermove', onPointerMove);
-    canvas.removeEventListener('pointerup',   onPointerUp);
-    canvas.style.cursor = '';
+    document.removeEventListener('mousemove',  onMouseMove);
+    document.removeEventListener('mouseleave', onMouseLeave);
   };
 }
 
