@@ -341,37 +341,47 @@ export async function initSphereRenderer(canvas: HTMLCanvasElement): Promise<() 
   });
   observer.observe(canvas);
 
-  // ── Cursor-reactive rotation ─────────────────────────────────────────────────
+  // ── Cursor-reactive / idle-spin mode ────────────────────────────────────────
   //
-  // No clicking required. The cursor position relative to the viewport centre
-  // continuously steers the torus:
-  //   • angle of cursor from centre  → rotation axis (perpendicular to the
-  //                                     cursor direction, in view space)
-  //   • distance from centre (0–1)   → speed multiplier on top of auto-spin
+  // Two modes that blend smoothly:
   //
-  // All values are EMA-smoothed so the torus eases toward the target.
+  //  CURSOR mode  – mouse has moved within the last IDLE_TIMEOUT seconds.
+  //                 Auto-spin is frozen; the torus reacts only to cursor position.
+  //                 • angle of cursor from viewport centre → rotation axis
+  //                 • distance from centre (0–1)          → spin speed
+  //
+  //  IDLE mode    – no mouse movement for IDLE_TIMEOUT seconds.
+  //                 Classic lazy auto-spin resumes from where it paused.
+  //
+  // The blend is a smooth 0→1 ramp over FADE_DURATION seconds so the switch
+  // between modes is never jarring.
 
-  /** Raw target: normalised cursor vector [-1,1] × [-1,1]. null = no cursor. */
+  const IDLE_TIMEOUT  = 5.0;   // seconds of no movement before idle kicks in
+  const FADE_DURATION = 1.5;   // seconds to cross-fade between modes
+  const CURSOR_EMA    = 0.06;  // EMA factor for smoothing cursor position
+  const MAX_CURSOR_SPEED = 2.8; // rad/s at edge of screen
+
+  /** Timestamp (ms) of the most recent mousemove event. */
+  let lastMoveMs = -Infinity;
+
+  /** Raw target cursor vector, normalised [-1,1]×[-1,1]. */
   let targetCX = 0;
   let targetCY = 0;
-  /** Smoothed cursor influence (EMA). */
+  /** EMA-smoothed cursor vector. */
   let smoothCX = 0;
   let smoothCY = 0;
-  // EMA factor: higher = faster response (0.04 feels like a gentle follow)
-  const CURSOR_EMA = 0.04;
-  // Maximum extra speed added when cursor is at the edge (distance=1)
-  const MAX_CURSOR_SPEED = 2.5;
 
   function onMouseMove(e: MouseEvent) {
-    // Normalise to [-1, 1] relative to the full viewport so the effect works
-    // even though the canvas is a background element.
-    targetCX =  (e.clientX / window.innerWidth  - 0.5) * 2;
-    targetCY = -(e.clientY / window.innerHeight - 0.5) * 2; // Y up
+    lastMoveMs = performance.now();
+    targetCX   =  (e.clientX / window.innerWidth  - 0.5) * 2;
+    targetCY   = -(e.clientY / window.innerHeight - 0.5) * 2; // Y-up
   }
 
   function onMouseLeave() {
-    targetCX = 0;
-    targetCY = 0;
+    // Treat leaving the page as "no cursor" – accelerate idle transition
+    lastMoveMs = -Infinity;
+    targetCX   = 0;
+    targetCY   = 0;
   }
 
   document.addEventListener('mousemove',  onMouseMove);
@@ -381,50 +391,62 @@ export async function initSphereRenderer(canvas: HTMLCanvasElement): Promise<() 
 
   const eye: [number, number, number] = [0, 1.5, 3.5];
   let rafId: number;
-  const startMs = performance.now();
   let lastFrameMs = performance.now();
 
-  // Accumulated orientation driven by cursor (separate from auto-spin so it
-  // doesn't fight the time-based angle offset).
+  // Cursor-driven accumulated orientation quaternion.
   let cursorQuat: Quat = quatIdentity();
 
+  // Auto-spin time offset: we freeze this while in cursor mode so the spin
+  // resumes seamlessly from the same angle when idle mode returns.
+  let autoSpinT   = 0.0;   // effective time for the auto-spin angle
+  let idleWeight  = 1.0;   // 0 = full cursor mode, 1 = full idle mode
+
   function frame() {
-    const nowMs  = performance.now();
-    const dt     = Math.min((nowMs - lastFrameMs) / 1000, 0.1); // cap at 100 ms
-    lastFrameMs  = nowMs;
-    const t      = (nowMs - startMs) / 1000;
+    const nowMs = performance.now();
+    const dt    = Math.min((nowMs - lastFrameMs) / 1000, 0.1);
+    lastFrameMs = nowMs;
 
-    // ── Smooth cursor influence ──────────────────────────────────────────────
-    smoothCX += (targetCX - smoothCX) * CURSOR_EMA;
-    smoothCY += (targetCY - smoothCY) * CURSOR_EMA;
+    // ── Compute idle blend weight ────────────────────────────────────────────
+    const idleSince = (nowMs - lastMoveMs) / 1000; // seconds since last move
+    // Target: 0 if cursor recently moved, 1 if idle long enough
+    const targetIdle = idleSince >= IDLE_TIMEOUT ? 1.0 : 0.0;
+    // Ease toward target at a rate of 1/FADE_DURATION per second
+    idleWeight += (targetIdle - idleWeight) * Math.min(dt / FADE_DURATION, 1.0);
 
-    // Distance from centre (clamped 0–1); drives speed boost
-    const dist  = Math.min(Math.sqrt(smoothCX * smoothCX + smoothCY * smoothCY), 1.0);
-    // Angle of cursor vector → rotation axis perpendicular to it
-    // cursor pointing right  (+x) → axis is +Y  (spin upward)
-    // cursor pointing up     (+y) → axis is -X  (tilt forward)
+    // ── Advance auto-spin time only proportional to idle weight ─────────────
+    autoSpinT += dt * backgroundFilter.speed * idleWeight;
+
+    // ── EMA-smooth cursor ────────────────────────────────────────────────────
+    // When idle, ease the cursor target back toward zero so the cursor
+    // influence gradually vanishes.
+    const effectiveTargetX = targetCX * (1 - idleWeight);
+    const effectiveTargetY = targetCY * (1 - idleWeight);
+    smoothCX += (effectiveTargetX - smoothCX) * CURSOR_EMA;
+    smoothCY += (effectiveTargetY - smoothCY) * CURSOR_EMA;
+
+    // ── Apply cursor rotation ────────────────────────────────────────────────
     const curLen = Math.sqrt(smoothCX * smoothCX + smoothCY * smoothCY);
     if (curLen > 1e-4) {
-      // Perpendicular to (cx, cy) in the XY plane is (-cy, cx)
-      const axisX = -smoothCY / curLen;
-      const axisY =  smoothCX / curLen;
-      // Speed scales with distance; multiply by dt so it's frame-rate independent
-      const spinSpeed = dist * MAX_CURSOR_SPEED * backgroundFilter.speed;
-      const dq = quatFromAxisAngle(axisX, axisY, 0, spinSpeed * dt);
-      cursorQuat = quatNorm(quatMul(dq, cursorQuat));
+      const dist   = Math.min(curLen, 1.0);
+      // Rotation axis perpendicular to cursor direction: (-cy, cx, 0)
+      const axisX  = -smoothCY / curLen;
+      const axisY  =  smoothCX / curLen;
+      const speed  = dist * MAX_CURSOR_SPEED * backgroundFilter.speed * (1 - idleWeight);
+      const dq     = quatFromAxisAngle(axisX, axisY, 0, speed * dt);
+      cursorQuat   = quatNorm(quatMul(dq, cursorQuat));
     }
 
     const aspect = canvas.width / canvas.height;
     const proj   = perspective(Math.PI / 4, aspect, 0.1, 100.0);
     const view   = lookAt(eye, [0, 0, 0], [0, 1, 0]);
 
-    // Auto-spin (always present, modulated by speed filter)
+    // Auto-spin model (uses frozen/thawed autoSpinT instead of wall clock)
     const slantX    = rotateX(Math.PI / 6);
     const slantZ    = rotateZ(Math.PI / 8);
-    const spinY     = rotateY(t * 1.2 * backgroundFilter.speed);
+    const spinY     = rotateY(autoSpinT * 1.2);
     const autoModel = mat4Mul(mat4Mul(spinY, slantX), slantZ);
 
-    // Layer cursor-driven orientation on top
+    // Cursor quaternion layered on top (fades out as idleWeight → 1)
     const cursorMat = quatToMat4(cursorQuat);
     const model     = mat4Mul(cursorMat, autoModel);
     const mvp       = mat4Mul(mat4Mul(proj, view), model);
