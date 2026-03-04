@@ -95,6 +95,52 @@ fn fs_main(in: VOut) -> @location(0) vec4<f32> {
 }
 `;
 
+// ── Quaternion helpers ────────────────────────────────────────────────────────
+
+type Quat = [number, number, number, number]; // x y z w
+
+function quatIdentity(): Quat { return [0, 0, 0, 1]; }
+
+function quatMul(a: Quat, b: Quat): Quat {
+  const [ax, ay, az, aw] = a;
+  const [bx, by, bz, bw] = b;
+  return [
+    aw*bx + ax*bw + ay*bz - az*by,
+    aw*by - ax*bz + ay*bw + az*bx,
+    aw*bz + ax*by - ay*bx + az*bw,
+    aw*bw - ax*bx - ay*by - az*bz,
+  ];
+}
+
+/** Build a quaternion from axis (must be unit) + angle (radians). */
+function quatFromAxisAngle(ax: number, ay: number, az: number, angle: number): Quat {
+  const s = Math.sin(angle / 2);
+  return [ax * s, ay * s, az * s, Math.cos(angle / 2)];
+}
+
+/** Normalise a quaternion in-place. */
+function quatNorm(q: Quat): Quat {
+  const len = Math.sqrt(q[0]*q[0] + q[1]*q[1] + q[2]*q[2] + q[3]*q[3]);
+  return len > 1e-9 ? [q[0]/len, q[1]/len, q[2]/len, q[3]/len] : quatIdentity();
+}
+
+/** Convert quaternion to column-major 4×4 rotation matrix. */
+function quatToMat4(q: Quat): Float32Array {
+  const [x, y, z, w] = q;
+  const m = new Float32Array(16);
+  m[0]  = 1 - 2*(y*y + z*z);
+  m[1]  =     2*(x*y + w*z);
+  m[2]  =     2*(x*z - w*y);
+  m[4]  =     2*(x*y - w*z);
+  m[5]  = 1 - 2*(x*x + z*z);
+  m[6]  =     2*(y*z + w*x);
+  m[8]  =     2*(x*z + w*y);
+  m[9]  =     2*(y*z - w*x);
+  m[10] = 1 - 2*(x*x + y*y);
+  m[15] = 1;
+  return m;
+}
+
 // ── tiny mat4 helpers (column-major) ─────────────────────────────────────────
 
 function mat4Mul(a: Float32Array, b: Float32Array): Float32Array {
@@ -295,6 +341,77 @@ export async function initSphereRenderer(canvas: HTMLCanvasElement): Promise<() 
   });
   observer.observe(canvas);
 
+  // ── Mouse / touch interaction ────────────────────────────────────────────────
+
+  /** Accumulated user-driven orientation quaternion (starts at identity). */
+  let userQuat: Quat = quatIdentity();
+  /** Momentum: angular velocity as a [ax, ay, az, speed] tuple. */
+  let momentumAxis  = [0, 1, 0];
+  let momentumSpeed = 0;
+
+  let pointerDown  = false;
+  let lastX        = 0;
+  let lastY        = 0;
+  /** Velocity samples for inertia. */
+  let velX         = 0;
+  let velY         = 0;
+
+  const DRAG_SENSITIVITY = 0.005;
+  const INERTIA_DECAY    = 0.92;
+
+  function onPointerDown(e: PointerEvent) {
+    pointerDown  = true;
+    lastX        = e.clientX;
+    lastY        = e.clientY;
+    velX         = 0;
+    velY         = 0;
+    momentumSpeed = 0;
+    canvas.setPointerCapture(e.pointerId);
+    e.preventDefault();
+  }
+
+  function onPointerMove(e: PointerEvent) {
+    if (!pointerDown) return;
+    const dx = e.clientX - lastX;
+    const dy = e.clientY - lastY;
+    lastX = e.clientX;
+    lastY = e.clientY;
+
+    // Smooth velocity with EMA
+    velX = velX * 0.6 + dx * 0.4;
+    velY = velY * 0.6 + dy * 0.4;
+
+    // Horizontal drag → rotate around world-Y axis
+    // Vertical   drag → rotate around world-X axis
+    // Combined gives an arbitrary-axis rotation matching the trackball feel.
+    const angle = Math.sqrt(dx*dx + dy*dy) * DRAG_SENSITIVITY;
+    if (angle < 1e-9) return;
+    // Rotation axis is perpendicular to drag direction (in view space)
+    const ax =  dy / (Math.sqrt(dx*dx + dy*dy) || 1);
+    const ay =  dx / (Math.sqrt(dx*dx + dy*dy) || 1);
+    const dq = quatFromAxisAngle(ax, ay, 0, angle);
+    userQuat = quatNorm(quatMul(dq, userQuat));
+    e.preventDefault();
+  }
+
+  function onPointerUp(e: PointerEvent) {
+    if (!pointerDown) return;
+    pointerDown = false;
+    // Transfer last velocity to momentum
+    const speed = Math.sqrt(velX*velX + velY*velY) * DRAG_SENSITIVITY;
+    if (speed > 1e-4) {
+      const len = Math.sqrt(velX*velX + velY*velY);
+      momentumAxis  = [ velY / len,  velX / len, 0];
+      momentumSpeed = speed;
+    }
+    e.preventDefault();
+  }
+
+  canvas.addEventListener('pointerdown', onPointerDown, { passive: false });
+  canvas.addEventListener('pointermove', onPointerMove, { passive: false });
+  canvas.addEventListener('pointerup',   onPointerUp,   { passive: false });
+  canvas.style.cursor = 'grab';
+
   // ── Render loop ──────────────────────────────────────────────────────────────
 
   const eye: [number, number, number] = [0, 1.5, 3.5];
@@ -304,15 +421,28 @@ export async function initSphereRenderer(canvas: HTMLCanvasElement): Promise<() 
   function frame() {
     const t = (performance.now() - startMs) / 1000;
 
+    // Apply inertia momentum
+    if (!pointerDown && momentumSpeed > 1e-5) {
+      const dq = quatFromAxisAngle(
+        momentumAxis[0], momentumAxis[1], momentumAxis[2],
+        momentumSpeed,
+      );
+      userQuat      = quatNorm(quatMul(dq, userQuat));
+      momentumSpeed *= INERTIA_DECAY;
+    }
+
     const aspect = canvas.width / canvas.height;
     const proj   = perspective(Math.PI / 4, aspect, 0.1, 100.0);
     const view   = lookAt(eye, [0, 0, 0], [0, 1, 0]);
-    // A spinning slanted torus: slant it on X and Z, spin on Y
+    // Auto-spin
     const slantX = rotateX(Math.PI / 6);
     const slantZ = rotateZ(Math.PI / 8);
     const spinY  = rotateY(t * 1.2 * backgroundFilter.speed);
-    const model  = mat4Mul(mat4Mul(spinY, slantX), slantZ);
-    const mvp    = mat4Mul(mat4Mul(proj, view), model);
+    const autoModel  = mat4Mul(mat4Mul(spinY, slantX), slantZ);
+    // Layer user-driven orientation on top of the auto-spin
+    const userMat = quatToMat4(userQuat);
+    const model   = mat4Mul(userMat, autoModel);
+    const mvp     = mat4Mul(mat4Mul(proj, view), model);
 
     const { opacity, color } = backgroundFilter;
     // pack uniforms: mvp (16), model (16), lightPos (4), viewPos (4), tint (4)
@@ -359,6 +489,10 @@ export async function initSphereRenderer(canvas: HTMLCanvasElement): Promise<() 
   return () => {
     cancelAnimationFrame(rafId);
     observer.disconnect();
+    canvas.removeEventListener('pointerdown', onPointerDown);
+    canvas.removeEventListener('pointermove', onPointerMove);
+    canvas.removeEventListener('pointerup',   onPointerUp);
+    canvas.style.cursor = '';
   };
 }
 
