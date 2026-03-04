@@ -4,16 +4,17 @@
 export interface BackgroundFilter {
   /** Torus rotation speed multiplier (default 1.0) */
   speed: number;
-  /** Overall opacity of the torus (0–1, default 0.18) */
+  /** Ordered-dither ink density – 0 = no dots, 1 = fully filled (default 0.55) */
   opacity: number;
-  /** RGB base colour of the torus (default [0.25, 0.55, 1.0]) */
+  /** RGB ink colour for the dither dots (default [0.55, 0.75, 1.0]) */
   color: [number, number, number];
 }
 
 const DEFAULT_FILTER: BackgroundFilter = {
   speed:   1.0,
-  opacity: 0.18,
-  color:   [0.25, 0.55, 1.0],
+  /** Controls dither dot density: higher = more ink pixels visible */
+  opacity: 0.55,
+  color:   [0.55, 0.75, 1.0],
 };
 
 /** Live filter – mutate its fields to change the look without restarting. */
@@ -25,7 +26,7 @@ struct Uniforms {
   model     : mat4x4<f32>,
   lightPos  : vec4<f32>,
   viewPos   : vec4<f32>,
-  // x=opacity, yzw=baseColor
+  // x=opacity/ink-weight, yzw=ink colour
   tint      : vec4<f32>,
 }
 
@@ -51,21 +52,46 @@ fn vs_main(v: VIn) -> VOut {
   return out;
 }
 
+// ── 4×4 Bayer ordered-dither matrix (values 0–15, normalised to 0–1) ─────────
+fn bayer4(px: vec2<u32>) -> f32 {
+  // row-major 4×4 Bayer matrix
+  const M = array<u32, 16>(
+     0u,  8u,  2u, 10u,
+    12u,  4u, 14u,  6u,
+     3u, 11u,  1u,  9u,
+    15u,  7u, 13u,  5u,
+  );
+  let idx = (px.y % 4u) * 4u + (px.x % 4u);
+  return f32(M[idx]) / 16.0;
+}
+
 @fragment
 fn fs_main(in: VOut) -> @location(0) vec4<f32> {
   let lightDir  = normalize(u.lightPos.xyz - in.worldPos);
   let viewDir   = normalize(u.viewPos.xyz  - in.worldPos);
   let halfDir   = normalize(lightDir + viewDir);
 
-  let ambient   = 0.12;
+  // Blinn-Phong luminance (0→1)
+  let ambient   = 0.10;
   let diff      = max(dot(in.worldNorm, lightDir), 0.0);
-  let spec      = pow(max(dot(in.worldNorm, halfDir), 0.0), 64.0) * 0.6;
+  let spec      = pow(max(dot(in.worldNorm, halfDir), 0.0), 48.0) * 0.55;
+  let lum       = clamp(ambient + diff * 0.85 + spec, 0.0, 1.0);
 
-  let base      = u.tint.yzw;
-  let color     = base * (ambient + diff * 0.8) + vec3<f32>(1.0) * spec;
-  // premultiplied alpha for alphaMode: 'premultiplied'
-  let a         = u.tint.x;
-  return vec4<f32>(color * a, a);
+  // Scale luminance by global ink-weight so the page filter controls density
+  let inkWeight = u.tint.x;           // 0–1 from backgroundFilter.opacity
+  let scaled    = lum * inkWeight * 3.5; // boost so midtones become visible dots
+
+  // Ordered dither: ink this pixel if luminance exceeds the Bayer threshold
+  let px        = vec2<u32>(u32(in.clipPos.x), u32(in.clipPos.y));
+  let threshold = bayer4(px);
+
+  if scaled <= threshold {
+    discard;                           // transparent – no ink
+  }
+
+  // Ink colour from tint (premultiplied alpha = fully opaque ink dot)
+  let ink = u.tint.yzw;
+  return vec4<f32>(ink, 1.0);
 }
 `;
 
@@ -238,8 +264,9 @@ export async function initSphereRenderer(canvas: HTMLCanvasElement): Promise<() 
       targets: [{
         format,
         blend: {
-          color: { srcFactor: 'one', dstFactor: 'one-minus-src-alpha', operation: 'add' },
-          alpha: { srcFactor: 'one', dstFactor: 'one-minus-src-alpha', operation: 'add' },
+          // Standard src-over: opaque ink dots composite over the transparent background
+          color: { srcFactor: 'src-alpha', dstFactor: 'one-minus-src-alpha', operation: 'add' },
+          alpha: { srcFactor: 'one',       dstFactor: 'one-minus-src-alpha', operation: 'add' },
         },
       }],
     },

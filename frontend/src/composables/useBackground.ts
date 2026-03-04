@@ -8,8 +8,8 @@ import { backgroundFilter, type BackgroundFilter } from '@/webgpu/sphere-rendere
  * The original filter values are restored when the component unmounts.
  *
  * @example
- * // Warm orange tint, slower spin for the CV page
- * useBackground({ speed: 0.4, opacity: 0.12, color: [1.0, 0.5, 0.2] });
+ * // Warm orange ink, slower spin for the CV page
+ * useBackground({ speed: 0.4, opacity: 0.35, color: [1.0, 0.6, 0.2] });
  */
 export function useBackground(filter: Partial<BackgroundFilter>) {
   // Save originals so we can restore them on unmount
