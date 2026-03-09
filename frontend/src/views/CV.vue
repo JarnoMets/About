@@ -2,7 +2,7 @@
   <div class="cv-page">
     <!-- Download button – hidden when printing -->
     <div class="cv-actions no-print">
-      <button class="btn-download" @click="downloadPdf">
+      <button class="btn btn-primary" @click="downloadPdf">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
           <path d="M12 3v13M7 11l5 5 5-5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
           <path d="M5 20h14" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
@@ -167,11 +167,10 @@ function downloadPdf(): void {
 <style scoped>
 /* ─── Screen wrapper ─────────────────────────────────────────────────────── */
 .cv-page {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
+  /* Match other pages: centered content column with consistent padding */
+  max-width: 960px;
+  margin: 0 auto;
   padding: 2rem 1rem 4rem;
-  min-height: calc(100vh - 4rem);
 }
 
 /* Download button */
@@ -183,29 +182,16 @@ function downloadPdf(): void {
   margin-bottom: 1.25rem;
 }
 
-.btn-download {
+.cv-actions .btn {
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
-  padding: 0.55rem 1.2rem;
-  border-radius: 8px;
-  background: #5568b4;
-  color: #fff;
-  font-size: 0.9rem;
-  font-weight: 600;
-  border: none;
-  cursor: pointer;
-  transition: background 0.2s ease, transform 0.15s ease;
-}
-.btn-download:hover {
-  background: #6478c4;
-  transform: translateY(-1px);
 }
 
-/* ─── A4 Document shell ──────────────────────────────────────────────────── */
+/* ─── A4 Document shell (responsive inside page) ────────────────────────── */
 .cv-document {
-  width: 794px;        /* 210mm at 96dpi */
-  min-height: 1123px;  /* 297mm at 96dpi */
+  width: 100%;
+  min-height: 900px;
   background: #f5f0e8; /* warm parchment – matches the original */
   color: #1a1a1a;
   font-family: 'Inter', system-ui, sans-serif;
@@ -248,7 +234,7 @@ function downloadPdf(): void {
 .cv-body {
   display: grid;
   grid-template-columns: 220px 1fr;
-  min-height: calc(1123px - 110px);
+  min-height: calc(900px - 110px);
 }
 
 .cv-sidebar {
