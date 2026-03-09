@@ -8,8 +8,8 @@ export interface BackgroundFilter {
   opacity: number;
   /** RGB ink colour for the dither dots (default [0.55, 0.75, 1.0]) */
   color: [number, number, number];
-  /** Rendering style: 'dither' (default dots) or 'wireframe' (lines) */
-  style?: 'dither' | 'wireframe';
+  /** Rendering style: 'dither' (ordered Bayer dots), 'noise-dither' (hash noise, midway density), or 'wireframe' (lines) */
+  style?: 'dither' | 'noise-dither' | 'wireframe';
   /** Dither density multiplier (0..1). Lower = fewer dots; 0.0 = very sparse, 1.0 = dense */
   ditherDensity?: number;
   /** Geometry resolution used to generate the torus (WASM or TS). Lower = fewer dots */
@@ -67,7 +67,6 @@ fn vs_main(v: VIn) -> VOut {
 
 // ── 4×4 Bayer ordered-dither matrix (values 0–15, normalised to 0–1) ─────────
 fn bayer4(px: vec2<u32>) -> f32 {
-  // row-major 4×4 Bayer matrix
   const M = array<u32, 16>(
      0u,  8u,  2u, 10u,
     12u,  4u, 14u,  6u,
@@ -76,6 +75,15 @@ fn bayer4(px: vec2<u32>) -> f32 {
   );
   let idx = (px.y % 4u) * 4u + (px.x % 4u);
   return f32(M[idx]) / 16.0;
+}
+
+// ── Integer hash noise – spatially uncorrelated, no visible grid pattern ─────
+fn hash2(px: vec2<u32>) -> f32 {
+  var h = px.x * 1664525u + px.y * 22695477u + 1013904223u;
+  h ^= h >> 16u;
+  h *= 0x45d9f3bu;
+  h ^= h >> 16u;
+  return f32(h) / f32(0xffffffffu);
 }
 
 @fragment
@@ -90,22 +98,21 @@ fn fs_main(in: VOut) -> @location(0) vec4<f32> {
   let spec      = pow(max(dot(in.worldNorm, halfDir), 0.0), 48.0) * 0.55;
   let lum       = clamp(ambient + diff * 0.85 + spec, 0.0, 1.0);
 
-  // Scale luminance by global ink-weight so the page filter controls density
-  let inkWeight = u.tint.x;           // 0–1 from backgroundFilter.opacity
-  // density in params.x controls how aggressively midtones get dotted
-  let density = clamp(u.params.x, 0.0, 1.0);
-  let boost = 1.5 + density * 2.0; // maps density 0..1 -> boost 1.5..3.5
-  let scaled    = lum * inkWeight * boost; // boost so midtones become visible dots
+  let inkWeight = u.tint.x;
+  let density   = clamp(u.params.x, 0.0, 1.0);
+  let boost     = 1.5 + density * 2.0;
+  let scaled    = lum * inkWeight * boost;
 
-  // Ordered dither: ink this pixel if luminance exceeds the Bayer threshold
-  let px        = vec2<u32>(u32(in.clipPos.x), u32(in.clipPos.y));
-  let threshold = bayer4(px);
+  let px = vec2<u32>(u32(in.clipPos.x), u32(in.clipPos.y));
+
+  // params.y selects dither mode: 0 = ordered Bayer, 1 = hash noise
+  let useNoise = u.params.y > 0.5;
+  let threshold = select(bayer4(px), hash2(px), useNoise);
 
   if scaled <= threshold {
-    discard;                           // transparent – no ink
+    discard;
   }
 
-  // Ink colour from tint (premultiplied alpha = fully opaque ink dot)
   let ink = u.tint.yzw;
   return vec4<f32>(ink, 1.0);
 }
@@ -629,15 +636,17 @@ fn fs_main() -> @location(0) vec4<f32> {
     const model     = mat4Mul(cursorMat, autoModel);
     const mvp       = mat4Mul(mat4Mul(proj, view), model);
 
-    const { opacity, color, ditherDensity } = backgroundFilter;
+    const { opacity, color, ditherDensity, style } = backgroundFilter;
+    const noiseMode = style === 'noise-dither' ? 1.0 : 0.0;
     // pack uniforms: mvp (16), model (16), lightPos (4), viewPos (4), tint (4), params (4)
+    // params: x=ditherDensity, y=noiseMode (0=Bayer, 1=hash), zw=unused
     const uniforms = new Float32Array(16 + 16 + 4 + 4 + 4 + 4);
     uniforms.set(mvp,   0);
     uniforms.set(model, 16);
-    uniforms.set([3.0, 4.0, 3.0, 1.0],              32);
-    uniforms.set([...eye, 1.0],                      36);
+    uniforms.set([3.0, 4.0, 3.0, 1.0],                    32);
+    uniforms.set([...eye, 1.0],                            36);
     uniforms.set([opacity, color[0], color[1], color[2]], 40);
-    uniforms.set([ditherDensity ?? 0.45, 0, 0, 0], 44);
+    uniforms.set([ditherDensity ?? 0.45, noiseMode, 0, 0], 44);
     queue.writeBuffer(ub, 0, uniforms);
 
     // If a page changed the target geometry resolution, regenerate buffers now.
@@ -666,6 +675,7 @@ fn fs_main() -> @location(0) vec4<f32> {
     });
 
     // Choose rendering style per the live backgroundFilter
+    // Both 'dither' and 'noise-dither' use the triangle pipeline (shader selects the threshold fn)
     if (backgroundFilter.style === 'wireframe') {
       rp.setPipeline(pipelineLine);
       rp.setBindGroup(0, bg);

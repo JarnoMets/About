@@ -12,6 +12,7 @@
 import { ref, onMounted, onUnmounted } from 'vue';
 import Navbar from '@/components/Navbar.vue';
 import { initSphereRenderer } from '@/webgpu/sphere-renderer';
+import { initBackgroundRenderer } from '@/utils/background-renderer';
 
 const bgCanvas = ref<HTMLCanvasElement | null>(null);
 let cleanup: (() => void) | null = null;
@@ -20,9 +21,13 @@ onMounted(async () => {
   if (!bgCanvas.value) return;
   try {
     cleanup = await initSphereRenderer(bgCanvas.value);
-  } catch (err) {
-    // WebGPU unavailable – canvas stays hidden, site still works
-    console.warn('Background WebGPU renderer unavailable:', err);
+  } catch {
+    // WebGPU unavailable – fall back to Canvas 2D dot renderer (matches live site)
+    try {
+      cleanup = initBackgroundRenderer(bgCanvas.value);
+    } catch (err2) {
+      console.warn('Background renderer unavailable:', err2);
+    }
   }
 });
 
@@ -41,6 +46,12 @@ onUnmounted(() => {
   /* ensure the animated canvas stays behind all UI chrome */
   z-index: -1;
   pointer-events: none;
+}
+
+@media print {
+  .bg-canvas {
+    display: none !important;
+  }
 }
 
 /* ── App shell sits above the canvas ── */
