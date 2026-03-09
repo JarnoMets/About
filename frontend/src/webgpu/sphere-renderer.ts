@@ -598,10 +598,18 @@ fn fs_main() -> @location(0) vec4<f32> {
     const curLen = Math.sqrt(smoothCX * smoothCX + smoothCY * smoothCY);
     if (curLen > 1e-4) {
       const dist   = Math.min(curLen, 1.0);
+      // Use sqrt mapping so speed grows quickly near center but tapers off
+      // toward the edges — feels much more natural than linear.
+      const distMapped = Math.sqrt(dist);
       // Rotation axis perpendicular to cursor direction: (-cy, cx, 0)
       const axisX  = -smoothCY / curLen;
       const axisY  =  smoothCX / curLen;
-      const speed  = dist * MAX_CURSOR_SPEED * backgroundFilter.speed * (1 - idleWeight);
+      // Normalise by screen diagonal (in CSS pixels) so the torus spins at
+      // the same perceived speed regardless of screen resolution / size.
+      const diagPx  = Math.sqrt(window.innerWidth * window.innerWidth + window.innerHeight * window.innerHeight);
+      const refDiag = 1920; // reference diagonal for a typical 1080p / 1440p screen
+      const resScale = refDiag / Math.max(diagPx, 400);
+      const speed  = distMapped * MAX_CURSOR_SPEED * backgroundFilter.speed * (1 - idleWeight) * resScale;
       const dq     = quatFromAxisAngle(axisX, axisY, 0, speed * dt);
       cursorQuat   = quatNorm(quatMul(dq, cursorQuat));
     }

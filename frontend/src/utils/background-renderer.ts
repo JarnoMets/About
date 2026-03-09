@@ -142,9 +142,15 @@ export function initBackgroundRenderer(canvas: HTMLCanvasElement): () => void {
     const curLen = Math.sqrt(smoothCX * smoothCX + smoothCY * smoothCY);
     if (curLen > 1e-4) {
       const dist = Math.min(curLen, 1.0);
+      // sqrt mapping: fast near center, tapers off toward the edges
+      const distMapped = Math.sqrt(dist);
       const axisX = -smoothCY / curLen;
       const axisY = smoothCX / curLen;
-      const speed = dist * MAX_CURSOR_SPEED * backgroundFilter.speed * (1 - idleWeight);
+      // Normalise by screen diagonal so the feel is resolution-independent
+      const diagPx  = Math.sqrt(window.innerWidth * window.innerWidth + window.innerHeight * window.innerHeight);
+      const refDiag = 1920;
+      const resScale = refDiag / Math.max(diagPx, 400);
+      const speed = distMapped * MAX_CURSOR_SPEED * backgroundFilter.speed * (1 - idleWeight) * resScale;
       const dq = quatFromAxisAngle(axisX, axisY, 0, speed * dt);
       cursorQuat = quatNorm(quatMul(dq, cursorQuat));
     }
