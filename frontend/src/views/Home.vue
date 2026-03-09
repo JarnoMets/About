@@ -14,15 +14,17 @@
 <script setup lang="ts">
 import { useBackground } from '@/composables/useBackground';
 
-// Match live site: a slightly less-sparse dither with cool-blue tone
+// Match live site: cool-blue dither dots at the same density / tone as the
+// Canvas-2D renderer that ships on about.jarnomets.com.
+// R=1.2, r=0.45, 70×50 segments, color=[0.55,0.75,1.0], opacity≈0.55
 useBackground({
   style: 'dither',
-  ditherDensity: 0.22, // make sparser — fewer dots like production
-  radialSegments: 40,
-  tubularSegments: 20,
-  speed: 0.9,
-  opacity: 0.62,
-  color: [0.48, 0.6, 0.8],
+  ditherDensity: 0.38,       // light dot spread — matches live-site midtone density
+  radialSegments: 70,
+  tubularSegments: 50,
+  speed: 1.0,
+  opacity: 0.55,
+  color: [0.55, 0.75, 1.0], // exact live-site cool-blue
 });
 </script>
 

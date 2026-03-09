@@ -139,8 +139,20 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 import { useI18n } from 'vue-i18n';
+import { useBackground } from '@/composables/useBackground';
 
 const { t, tm } = useI18n();
+
+// Unique CV torus: slow wireframe in warm amber/gold, thinner tube,
+// giving a technical "blueprint" feel that contrasts with the home page.
+useBackground({
+  style: 'wireframe',
+  speed: 0.35,
+  opacity: 0.70,
+  color: [0.95, 0.72, 0.28],   // warm amber-gold
+  radialSegments: 48,
+  tubularSegments: 24,
+});
 
 interface CvJob {
   period: string;
@@ -175,7 +187,7 @@ function downloadPdf(): void {
 
 /* Download button */
 .cv-actions {
-  /* When inside the cv-document we position it in the top-right corner */
+  /* Positioned relative to cv-document (which has position: relative) */
   position: absolute;
   top: 1rem;
   right: 1rem;
@@ -205,6 +217,7 @@ function downloadPdf(): void {
 
 /* ─── A4 Document shell (responsive inside page) ────────────────────────── */
 .cv-document {
+  position: relative;
   width: 100%;
   min-height: 900px;
   /* Dark modern theme for on-screen viewing. Keep print rules intact. */
