@@ -1,18 +1,18 @@
 <template>
   <div class="cv-page">
-    <!-- Download button – hidden when printing -->
-    <div class="cv-actions no-print">
-      <button class="btn btn-primary" @click="downloadPdf">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-          <path d="M12 3v13M7 11l5 5 5-5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-          <path d="M5 20h14" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-        </svg>
-        {{ t('cv.download_pdf') }}
-      </button>
-    </div>
+    <!-- Download button – hidden when printing. It's rendered inside the CV document and visually sits in the header corner. -->
 
     <!-- A4 CV Document -->
     <div class="cv-document" ref="cvDocument">
+      <div class="cv-actions no-print">
+        <button class="btn cv-download" @click="downloadPdf">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <path d="M12 3v13M7 11l5 5 5-5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M5 20h14" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+          </svg>
+          {{ t('cv.download_pdf') }}
+        </button>
+      </div>
       <!-- Header -->
       <header class="cv-header">
         <h1 class="cv-name">Jarno Mets</h1>
@@ -175,11 +175,11 @@ function downloadPdf(): void {
 
 /* Download button */
 .cv-actions {
-  width: 100%;
-  max-width: 794px;
-  display: flex;
-  justify-content: flex-end;
-  margin-bottom: 1.25rem;
+  /* When inside the cv-document we position it in the top-right corner */
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  z-index: 4;
 }
 
 .cv-actions .btn {
@@ -187,6 +187,21 @@ function downloadPdf(): void {
   align-items: center;
   gap: 0.5rem;
 }
+
+.cv-download {
+  background: linear-gradient(90deg,#3755ff 0%, #1ed6c4 100%);
+  color: #04111a;
+  padding: 0.5rem 0.9rem;
+  border-radius: 8px;
+  border: none;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  box-shadow: 0 6px 18px rgba(20,50,120,0.25);
+  cursor: pointer;
+}
+.cv-download svg { color: inherit; }
 
 /* ─── A4 Document shell (responsive inside page) ────────────────────────── */
 .cv-document {
@@ -404,6 +419,15 @@ function downloadPdf(): void {
   }
   .no-print {
     display: none !important;
+  }
+  /* Ensure UI chrome (language selector, nav controls, etc) is never printed */
+  .nav-controls,
+  .language-select,
+  .lang-dropdown,
+  .hamburger,
+  .navbar {
+    display: none !important;
+    visibility: hidden !important;
   }
   a {
     color: inherit !important;
