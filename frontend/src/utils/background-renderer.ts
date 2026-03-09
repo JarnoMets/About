@@ -1,24 +1,12 @@
+import { backgroundFilter } from '@/webgpu/sphere-renderer';
+
 const IDLE_TIMEOUT  = 5.0;   // seconds of no movement before idle kicks in
 const FADE_DURATION = 1.5;   // seconds to cross-fade between modes
 const CURSOR_EMA    = 0.06;  // EMA factor for smoothing cursor position
 const MAX_CURSOR_SPEED = 2.8; // rad/s at edge of screen
 
-export interface BackgroundFilter {
-  /** Rotation speed multiplier (default 1.0) */
-  speed: number;
-  /** Ink density / line thickness – 0 = none, 1 = full (default 0.55) */
-  opacity: number;
-  /** RGB ink colour for the dots (default [0.55, 0.75, 1.0]) */
-  color: [number, number, number];
-}
-
-const DEFAULT_FILTER: BackgroundFilter = {
-  speed: 1.0,
-  opacity: 0.55,
-  color: [0.55, 0.75, 1.0],
-};
-
-export const backgroundFilter: BackgroundFilter = { ...DEFAULT_FILTER };
+// Re-export so callers that imported from here still compile.
+export { backgroundFilter };
 
 // ── Quaternion helpers ────────────────────────────────────────────────────────
 
