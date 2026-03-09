@@ -1,12 +1,15 @@
-import { backgroundFilter } from '@/webgpu/sphere-renderer';
+// Standalone Canvas 2D dot renderer – used only by the Home page.
+// Has no dependency on the WebGPU sphere-renderer.
 
-const IDLE_TIMEOUT  = 5.0;   // seconds of no movement before idle kicks in
-const FADE_DURATION = 1.5;   // seconds to cross-fade between modes
-const CURSOR_EMA    = 0.06;  // EMA factor for smoothing cursor position
-const MAX_CURSOR_SPEED = 2.8; // rad/s at edge of screen
+const IDLE_TIMEOUT     = 5.0;
+const FADE_DURATION    = 1.5;
+const CURSOR_EMA       = 0.06;
+const MAX_CURSOR_SPEED = 2.8;
 
-// Re-export so callers that imported from here still compile.
-export { backgroundFilter };
+// Fixed visual settings matching the live site
+const DOT_SPEED   = 1.0;
+const DOT_OPACITY = 0.55;
+const DOT_COLOR: [number, number, number] = [0.55, 0.75, 1.0];
 
 // ── Quaternion helpers ────────────────────────────────────────────────────────
 
@@ -120,7 +123,7 @@ export function initBackgroundRenderer(canvas: HTMLCanvasElement): () => void {
     const idleSince = (nowMs - lastMoveMs) / 1000;
     const targetIdle = idleSince >= IDLE_TIMEOUT ? 1.0 : 0.0;
     idleWeight += (targetIdle - idleWeight) * Math.min(dt / FADE_DURATION, 1.0);
-    autoSpinT += dt * backgroundFilter.speed * idleWeight;
+    autoSpinT += dt * DOT_SPEED * idleWeight;
 
     const effectiveTargetX = targetCX * (1 - idleWeight);
     const effectiveTargetY = targetCY * (1 - idleWeight);
@@ -138,7 +141,7 @@ export function initBackgroundRenderer(canvas: HTMLCanvasElement): () => void {
       const diagPx  = Math.sqrt(window.innerWidth * window.innerWidth + window.innerHeight * window.innerHeight);
       const refDiag = 1920;
       const resScale = refDiag / Math.max(diagPx, 400);
-      const speed = distMapped * MAX_CURSOR_SPEED * backgroundFilter.speed * (1 - idleWeight) * resScale;
+      const speed = distMapped * MAX_CURSOR_SPEED * DOT_SPEED * (1 - idleWeight) * resScale;
       const dq = quatFromAxisAngle(axisX, axisY, 0, speed * dt);
       cursorQuat = quatNorm(quatMul(dq, cursorQuat));
     }
@@ -158,9 +161,9 @@ export function initBackgroundRenderer(canvas: HTMLCanvasElement): () => void {
     const centerY = height / 2;
     const scaleFactor = Math.min(width, height) * 0.35;
 
-    const [cr, cg, cb] = backgroundFilter.color;
+    const [cr, cg, cb] = DOT_COLOR;
     ctx!.fillStyle = `rgb(${cr * 255}, ${cg * 255}, ${cb * 255})`;
-    const inkWeight = backgroundFilter.opacity;
+    const inkWeight = DOT_OPACITY;
 
     const projected = points.map(p => {
       const lx = (R + r * Math.cos(p.v)) * Math.cos(p.u);
