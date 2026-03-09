@@ -6,7 +6,13 @@
 
     <header class="detail-header">
       <div class="header-image">
-        <div class="image-placeholder">
+        <ImageSlideshow
+          v-if="images.length > 0"
+          :project-id="project.id"
+          :images="images"
+          :config="slideshowConfig"
+        />
+        <div v-else class="image-placeholder">
           <span class="placeholder-icon">{{ project.icon }}</span>
         </div>
       </div>
@@ -68,6 +74,8 @@
 import { computed } from 'vue';
 import { useRoute } from 'vue-router';
 import { useI18n } from 'vue-i18n';
+import { useProjectImages } from '@/composables/useProjectImages';
+import ImageSlideshow from '@/components/ImageSlideshow.vue';
 
 const route = useRoute();
 const { t, tm } = useI18n();
@@ -134,6 +142,8 @@ const project = computed(() => {
   const id = route.params.id as string;
   return projectsData.find(p => p.id === id);
 });
+
+const { images, slideshowConfig } = useProjectImages(computed(() => project.value?.id || ''));
 
 const featureKeys = computed(() => {
   if (!project.value) return {};

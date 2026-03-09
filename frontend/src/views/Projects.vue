@@ -13,9 +13,7 @@
         :class="{ 'card-reversed': index % 2 !== 0 }"
       >
         <div class="card-image">
-          <div class="image-placeholder">
-            <span class="placeholder-icon">{{ project.icon }}</span>
-          </div>
+          <ProjectThumbnail :project-id="project.id" :fallback-icon="project.icon" />
         </div>
         <div class="card-content">
           <h2 class="card-title">{{ t(`projects.${project.id}.name`) }}</h2>
@@ -52,6 +50,7 @@
 <script setup lang="ts">
 import { useI18n } from 'vue-i18n';
 import { useBackground } from '@/composables/useBackground';
+import ProjectThumbnail from '@/components/ProjectThumbnail.vue';
 
 // Projects page prefers wireframe for a technical look
 useBackground({ style: 'wireframe', speed: 0.8, opacity: 0.6 });

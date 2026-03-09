@@ -50,7 +50,7 @@
           <!-- Projects -->
           <section class="cv-section">
             <h2 class="section-title">{{ t('cv.projects_title') }}</h2>
-            <div v-for="project in tm('cv.projects') as CvProject[]" :key="project.name" class="timeline-entry">
+            <div v-for="project in (tm('cv.projects') as any)" :key="project.name" class="timeline-entry">
               <div class="entry-header">
                 <span class="entry-period">{{ project.year }}</span>
                 <span class="entry-company">{{ project.name }}</span>
@@ -67,7 +67,7 @@
           <!-- Current position -->
           <section class="cv-section">
             <h2 class="section-title">{{ t('cv.current_title') }}</h2>
-            <div v-for="job in tm('cv.current') as CvJob[]" :key="job.company" class="timeline-entry">
+            <div v-for="job in (tm('cv.current') as any)" :key="job.company" class="timeline-entry">
               <div class="entry-header">
                 <span class="entry-period">{{ job.period }}</span>
                 <span class="entry-company">{{ job.company }}</span>
@@ -82,7 +82,7 @@
           <!-- Past experience -->
           <section class="cv-section">
             <h2 class="section-title">{{ t('cv.experience_title') }}</h2>
-            <div v-for="job in tm('cv.experience') as CvJob[]" :key="job.company" class="timeline-entry">
+            <div v-for="job in (tm('cv.experience') as any)" :key="job.company" class="timeline-entry">
               <div class="entry-header">
                 <span class="entry-period">{{ job.period }}</span>
                 <span class="entry-company">{{ job.company }}</span>
@@ -155,19 +155,6 @@ useBackground({
   radialSegments: 64,
   tubularSegments: 32,
 });
-
-interface CvJob {
-  period: string;
-  company: string;
-  role: string;
-  bullets: string[];
-}
-
-interface CvProject {
-  year: string;
-  name: string;
-  bullets: string[];
-}
 
 const skills = ['C', 'Rust', 'C++', 'DotNET (C#)', 'Python', 'Lua'];
 
