@@ -422,6 +422,8 @@ function downloadPdf(): void {
   .cv-document * {
     visibility: visible;
   }
+
+  /* ── Light / printer-friendly theme ── */
   .cv-document {
     position: fixed;
     top: 0;
@@ -431,15 +433,44 @@ function downloadPdf(): void {
     box-shadow: none;
     border-radius: 0;
     font-size: 10.5px;
-    /* Force the dark background + colours to actually print */
-    -webkit-print-color-adjust: exact;
-    print-color-adjust: exact;
-    color-adjust: exact;
+    /* Switch to white background + dark ink for printing */
+    background: #ffffff !important;
+    color: #111 !important;
   }
+  .cv-header {
+    border-bottom-color: #ccc !important;
+  }
+  .cv-name { color: #111 !important; }
+  .cv-job-title {
+    background: none !important;
+    color: #333 !important;
+    border: 1px solid #333;
+  }
+  .cv-sidebar {
+    background: #f5f5f5 !important;
+    border-right-color: #ddd !important;
+  }
+  .section-title {
+    color: #111 !important;
+    border-bottom-color: #ccc !important;
+  }
+  .profile-text,
+  .education-entry p,
+  .skills-list li,
+  .entry-role,
+  .entry-bullets li,
+  .contact-list li { color: #222 !important; }
+  .education-entry strong,
+  .entry-company { color: #000 !important; }
+  .period,
+  .entry-period,
+  .contact-list svg { color: #555 !important; }
+  .skills-list li::before { color: #555 !important; }
+  .contact-list a { color: #222 !important; }
+
   .no-print {
     display: none !important;
   }
-  /* Ensure UI chrome (language selector, nav controls, etc) is never printed */
   .nav-controls,
   .language-select,
   .lang-dropdown,
