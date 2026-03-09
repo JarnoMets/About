@@ -1,5 +1,6 @@
 // Standalone Canvas 2D dot renderer – used only by the Home page.
 // Has no dependency on the WebGPU sphere-renderer.
+import { sharedRotation } from '@/composables/useSharedRotation';
 
 const IDLE_TIMEOUT     = 5.0;
 const FADE_DURATION    = 1.5;
@@ -63,13 +64,10 @@ export function initBackgroundRenderer(canvas: HTMLCanvasElement): () => void {
   let rafId: number;
   let lastFrameMs = performance.now();
   
-  let lastMoveMs = -Infinity;
   let targetCX = 0;
   let targetCY = 0;
   let smoothCX = 0;
   let smoothCY = 0;
-  let cursorQuat: Quat = quatIdentity();
-  let autoSpinT = 0.0;
   let idleWeight = 1.0;
 
   const radialSegments = 70;
@@ -101,13 +99,13 @@ export function initBackgroundRenderer(canvas: HTMLCanvasElement): () => void {
   observer.observe(canvas);
 
   function onMouseMove(e: MouseEvent) {
-    lastMoveMs = performance.now();
+    sharedRotation.lastMoveMs = performance.now();
     targetCX = (e.clientX / window.innerWidth - 0.5) * 2;
     targetCY = -(e.clientY / window.innerHeight - 0.5) * 2;
   }
 
   function onMouseLeave() {
-    lastMoveMs = -Infinity;
+    sharedRotation.lastMoveMs = -Infinity;
     targetCX = 0;
     targetCY = 0;
   }
@@ -120,10 +118,10 @@ export function initBackgroundRenderer(canvas: HTMLCanvasElement): () => void {
     const dt = Math.min((nowMs - lastFrameMs) / 1000, 0.1);
     lastFrameMs = nowMs;
 
-    const idleSince = (nowMs - lastMoveMs) / 1000;
+    const idleSince = (nowMs - sharedRotation.lastMoveMs) / 1000;
     const targetIdle = idleSince >= IDLE_TIMEOUT ? 1.0 : 0.0;
     idleWeight += (targetIdle - idleWeight) * Math.min(dt / FADE_DURATION, 1.0);
-    autoSpinT += dt * DOT_SPEED * idleWeight;
+    sharedRotation.autoSpinT += dt * DOT_SPEED * idleWeight;
 
     const effectiveTargetX = targetCX * (1 - idleWeight);
     const effectiveTargetY = targetCY * (1 - idleWeight);
@@ -143,15 +141,15 @@ export function initBackgroundRenderer(canvas: HTMLCanvasElement): () => void {
       const resScale = refDiag / Math.max(diagPx, 400);
       const speed = distMapped * MAX_CURSOR_SPEED * DOT_SPEED * (1 - idleWeight) * resScale;
       const dq = quatFromAxisAngle(axisX, axisY, 0, speed * dt);
-      cursorQuat = quatNorm(quatMul(dq, cursorQuat));
+      sharedRotation.cursorQuat = quatNorm(quatMul(dq, sharedRotation.cursorQuat));
     }
 
     const slantX = [[1,0,0],[0, Math.cos(Math.PI/6), -Math.sin(Math.PI/6)],[0, Math.sin(Math.PI/6), Math.cos(Math.PI/6)]];
     const slantZ = [[Math.cos(Math.PI/8), -Math.sin(Math.PI/8), 0], [Math.sin(Math.PI/8), Math.cos(Math.PI/8), 0], [0,0,1]];
-    const spinY = [[Math.cos(autoSpinT*1.2), 0, Math.sin(autoSpinT*1.2)], [0,1,0], [-Math.sin(autoSpinT*1.2), 0, Math.cos(autoSpinT*1.2)]];
+    const spinY = [[Math.cos(sharedRotation.autoSpinT*1.2), 0, Math.sin(sharedRotation.autoSpinT*1.2)], [0,1,0], [-Math.sin(sharedRotation.autoSpinT*1.2), 0, Math.cos(sharedRotation.autoSpinT*1.2)]];
     
     let modelMat = matMul3(matMul3(spinY, slantX), slantZ);
-    const cursorMat = quatToRotationMatrix(cursorQuat);
+    const cursorMat = quatToRotationMatrix(sharedRotation.cursorQuat);
     const finalMat = matMul3(cursorMat, modelMat);
 
     const { width, height } = canvas;
@@ -208,7 +206,7 @@ export function initBackgroundRenderer(canvas: HTMLCanvasElement): () => void {
         const lum = Math.max(0, (p.z + r) / (r * 2)) + 0.2;
         
         // Add a slight shimmer/activity based on position and time
-        const shimmer = Math.sin(p.z * 1.5 + autoSpinT * 1.2 + p.phase) * 0.12;
+        const shimmer = Math.sin(p.z * 1.5 + sharedRotation.autoSpinT * 1.2 + p.phase) * 0.12;
         const dotAlpha = Math.max(0, Math.min(1, (inkWeight * (0.4 + 0.6 * lum)) + shimmer));
         
         ctx!.globalAlpha = dotAlpha;
