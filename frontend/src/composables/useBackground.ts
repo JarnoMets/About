@@ -19,11 +19,19 @@ export function useBackground(filter: Partial<BackgroundFilter>) {
     if (filter.speed   !== undefined) backgroundFilter.speed   = filter.speed;
     if (filter.opacity !== undefined) backgroundFilter.opacity = filter.opacity;
     if (filter.color   !== undefined) backgroundFilter.color   = filter.color;
+    if (filter.style   !== undefined) backgroundFilter.style    = filter.style;
+    if (filter.ditherDensity !== undefined) backgroundFilter.ditherDensity = filter.ditherDensity;
+    if (filter.radialSegments !== undefined) backgroundFilter.radialSegments = filter.radialSegments;
+    if (filter.tubularSegments !== undefined) backgroundFilter.tubularSegments = filter.tubularSegments;
   });
 
   onUnmounted(() => {
     backgroundFilter.speed   = saved.speed;
     backgroundFilter.opacity = saved.opacity;
     backgroundFilter.color   = saved.color;
+    backgroundFilter.style = saved.style;
+    backgroundFilter.ditherDensity = saved.ditherDensity;
+    backgroundFilter.radialSegments = saved.radialSegments;
+    backgroundFilter.tubularSegments = saved.tubularSegments;
   });
 }

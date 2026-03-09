@@ -12,7 +12,18 @@
 </template>
 
 <script setup lang="ts">
-// Default filter – the torus is brightest / fastest on the home page
+import { useBackground } from '@/composables/useBackground';
+
+// Match live site: a slightly less-sparse dither with cool-blue tone
+useBackground({
+  style: 'dither',
+  ditherDensity: 0.22, // make sparser — fewer dots like production
+  radialSegments: 40,
+  tubularSegments: 20,
+  speed: 0.9,
+  opacity: 0.62,
+  color: [0.48, 0.6, 0.8],
+});
 </script>
 
 <style scoped>

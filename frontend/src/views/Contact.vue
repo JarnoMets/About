@@ -147,6 +147,10 @@
 import { ref, reactive } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { api } from '../api';
+import { useBackground } from '@/composables/useBackground';
+
+// Contact page: original dense dither
+useBackground({ style: 'dither', ditherDensity: 0.9, speed: 0.7, opacity: 0.6 });
 
 const { t } = useI18n();
 

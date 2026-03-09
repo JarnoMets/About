@@ -51,6 +51,10 @@
 
 <script setup lang="ts">
 import { useI18n } from 'vue-i18n';
+import { useBackground } from '@/composables/useBackground';
+
+// Projects page prefers wireframe for a technical look
+useBackground({ style: 'wireframe', speed: 0.8, opacity: 0.6 });
 
 const { t } = useI18n();
 

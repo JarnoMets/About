@@ -8,6 +8,13 @@ export interface BackgroundFilter {
   opacity: number;
   /** RGB ink colour for the dither dots (default [0.55, 0.75, 1.0]) */
   color: [number, number, number];
+  /** Rendering style: 'dither' (default dots) or 'wireframe' (lines) */
+  style?: 'dither' | 'wireframe';
+  /** Dither density multiplier (0..1). Lower = fewer dots; 0.0 = very sparse, 1.0 = dense */
+  ditherDensity?: number;
+  /** Geometry resolution used to generate the torus (WASM or TS). Lower = fewer dots */
+  radialSegments?: number;
+  tubularSegments?: number;
 }
 
 const DEFAULT_FILTER: BackgroundFilter = {
@@ -15,6 +22,10 @@ const DEFAULT_FILTER: BackgroundFilter = {
   /** Controls dither dot density: higher = more ink pixels visible */
   opacity: 0.55,
   color:   [0.55, 0.75, 1.0],
+  style:  'wireframe',
+  ditherDensity: 0.45,
+  radialSegments: 64,
+  tubularSegments: 32,
 };
 
 /** Live filter – mutate its fields to change the look without restarting. */
@@ -28,6 +39,8 @@ struct Uniforms {
   viewPos   : vec4<f32>,
   // x=opacity/ink-weight, yzw=ink colour
   tint      : vec4<f32>,
+  // params.x = dither density (0..1)
+  params    : vec4<f32>,
 }
 
 @group(0) @binding(0) var<uniform> u : Uniforms;
@@ -79,7 +92,10 @@ fn fs_main(in: VOut) -> @location(0) vec4<f32> {
 
   // Scale luminance by global ink-weight so the page filter controls density
   let inkWeight = u.tint.x;           // 0–1 from backgroundFilter.opacity
-  let scaled    = lum * inkWeight * 3.5; // boost so midtones become visible dots
+  // density in params.x controls how aggressively midtones get dotted
+  let density = clamp(u.params.x, 0.0, 1.0);
+  let boost = 1.5 + density * 2.0; // maps density 0..1 -> boost 1.5..3.5
+  let scaled    = lum * inkWeight * boost; // boost so midtones become visible dots
 
   // Ordered dither: ink this pixel if luminance exceeds the Bayer threshold
   let px        = vec2<u32>(u32(in.clipPos.x), u32(in.clipPos.y));
@@ -222,21 +238,55 @@ export async function initSphereRenderer(canvas: HTMLCanvasElement): Promise<() 
     throw new Error('WebGPU is not supported in this browser.');
   }
 
-  // Load the WASM module from the public directory
-  const wasmUrl = new URL('/wasm-sphere/wasm_sphere.js', import.meta.url).href;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const wasmMod = await import(/* @vite-ignore */ wasmUrl) as {
-    default: () => Promise<void>;
-    torus_vertices: (radial_segments: number, tubular_segments: number, radius: number, tube: number) => Float32Array;
-    torus_indices:  (radial_segments: number, tubular_segments: number) => Uint32Array;
-  };
-  await wasmMod.default(); // initialise WASM
-  const { torus_vertices, torus_indices } = wasmMod;
+  // Dev-time diagnostics: log which source is used and current filter settings
+  // Only run in non-production so we don't spam logs on live.
+  const isDev = typeof import.meta !== 'undefined' && (import.meta as any).env && (import.meta as any).env.MODE !== 'production';
+  if (isDev) {
+    // eslint-disable-next-line no-console
+    console.info('[sphere-renderer] init requested. backgroundFilter:', JSON.parse(JSON.stringify(backgroundFilter)));
+  }
+
+  // Try loading the WASM module first (fast and native in many builds).
+  // If that fails (not built / not present), fall back to the TS generator.
+  let torus_vertices: (radial_segments: number, tubular_segments: number, radius: number, tube: number) => Float32Array;
+  let torus_indices: (radial_segments: number, tubular_segments: number) => Uint32Array;
+
+  try {
+    const wasmUrl = new URL('/wasm-sphere/wasm_sphere.js', import.meta.url).href;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const wasmMod = await import(/* @vite-ignore */ wasmUrl) as any;
+    if (wasmMod && typeof wasmMod.default === 'function') {
+      await wasmMod.default(); // initialise WASM if present
+    }
+    torus_vertices = wasmMod?.torus_vertices;
+    torus_indices  = wasmMod?.torus_indices;
+    if (isDev) console.info('[sphere-renderer] using WASM module for torus geometry');
+  } catch (e) {
+    // WASM not available or failed at runtime — fall back to TypeScript generator.
+    const tsMod = await import('./torus-geometry');
+    torus_vertices = tsMod.torus_vertices;
+    torus_indices  = tsMod.torus_indices;
+    if (isDev) console.info('[sphere-renderer] WASM load failed — using TS fallback for torus geometry', e);
+  }
 
   // Copy from WASM memory into regular ArrayBuffers (WASM may use SharedArrayBuffer)
-  const vertData   = new Float32Array(torus_vertices(64, 32, 1.2, 0.4));
-  const indexData  = new Uint32Array(torus_indices(64, 32));
-  const indexCount = indexData.length;
+  // torus_vertices/indices may be either WASM exports (already returning typed arrays)
+  // or the TS fallback which returns typed arrays as well.
+  const radial = backgroundFilter.radialSegments ?? 64;
+  const tubular = backgroundFilter.tubularSegments ?? 32;
+  const vertData   = torus_vertices(radial, tubular, 1.2, 0.4);
+  const indexData  = torus_indices(radial, tubular);
+  let indexCount = indexData.length;
+
+  // Ensure we have proper TypedArray views for the GPU writeBuffer call.
+  // The WASM-generated exports may return exotic views; coerce when necessary.
+  const vertArray: Float32Array = (ArrayBuffer.isView(vertData) && (vertData instanceof Float32Array))
+    ? vertData
+    : new Float32Array(vertData as ArrayLike<number>);
+
+  const indexArray: Uint32Array = (ArrayBuffer.isView(indexData) && (indexData instanceof Uint32Array))
+    ? indexData
+    : new Uint32Array(indexData as ArrayLike<number>);
 
   // ── WebGPU init ─────────────────────────────────────────────────────────────
 
@@ -252,19 +302,103 @@ export async function initSphereRenderer(canvas: HTMLCanvasElement): Promise<() 
 
   // ── Buffers ──────────────────────────────────────────────────────────────────
 
-  const vb = device.createBuffer({
-    size: vertData.byteLength,
+  // Vertex / index buffers are mutable so we can regenerate geometry at runtime
+  let vb = device.createBuffer({
+    size: vertArray.byteLength,
     usage: GPUBufferUsage.VERTEX | GPUBufferUsage.COPY_DST,
   });
-  device.queue.writeBuffer(vb, 0, vertData);
+  // Use the underlying ArrayBuffer to avoid type issues with some lib GPU typings.
+  device.queue.writeBuffer(vb, 0, vertArray.buffer, vertArray.byteOffset, vertArray.byteLength);
 
-  const ib = device.createBuffer({
-    size: indexData.byteLength,
+  let ib = device.createBuffer({
+    size: indexArray.byteLength,
     usage: GPUBufferUsage.INDEX | GPUBufferUsage.COPY_DST,
   });
-  device.queue.writeBuffer(ib, 0, indexData);
+  device.queue.writeBuffer(ib, 0, indexArray.buffer, indexArray.byteOffset, indexArray.byteLength);
 
-  const UNIFORM_SIZE = 4 * (16 + 16 + 4 + 4 + 4); // 2× mat4 + 3× vec4 (lightPos, viewPos, tint)
+  // Build a line-list index buffer for wireframe rendering (dedup edges)
+  const edgeSet = new Set<string>();
+  const lineIndices: number[] = [];
+  for (let t = 0; t < indexArray.length; t += 3) {
+    const a = indexArray[t], b = indexArray[t+1], c = indexArray[t+2];
+    const edges = [[a,b],[b,c],[c,a]];
+    for (const [x,y] of edges) {
+      const mn = x < y ? x : y;
+      const mx = x < y ? y : x;
+      const key = mn + ',' + mx;
+      if (!edgeSet.has(key)) {
+        edgeSet.add(key);
+        lineIndices.push(mn, mx);
+      }
+    }
+  }
+
+  const lineIndexArray = new Uint32Array(lineIndices);
+  let ibLine = device.createBuffer({ size: lineIndexArray.byteLength, usage: GPUBufferUsage.INDEX | GPUBufferUsage.COPY_DST });
+  device.queue.writeBuffer(ibLine, 0, lineIndexArray.buffer, lineIndexArray.byteOffset, lineIndexArray.byteLength);
+  let lineIndexCount = lineIndexArray.length;
+
+  // Track last-used geometry resolution so we can regenerate if a page changes it.
+  let lastRadial = radial;
+  let lastTubular = tubular;
+
+  // Helper: regenerate geometry buffers from the torus generator (WASM or TS)
+  function regenerateGeometry(newRadial: number, newTubular: number) {
+    try {
+      const vdata = torus_vertices(newRadial, newTubular, 1.2, 0.4);
+      const idata = torus_indices(newRadial, newTubular);
+
+      const vArr: Float32Array = (ArrayBuffer.isView(vdata) && (vdata instanceof Float32Array))
+        ? vdata
+        : new Float32Array(vdata as ArrayLike<number>);
+
+      const iArr: Uint32Array = (ArrayBuffer.isView(idata) && (idata instanceof Uint32Array))
+        ? idata
+        : new Uint32Array(idata as ArrayLike<number>);
+
+      // Destroy old GPU buffers (safe no-op in older impls) then recreate with new sizes
+      try { vb.destroy(); } catch (e) { /* ignore */ }
+      try { ib.destroy(); } catch (e) { /* ignore */ }
+      try { ibLine.destroy(); } catch (e) { /* ignore */ }
+
+      vb = device.createBuffer({ size: vArr.byteLength, usage: GPUBufferUsage.VERTEX | GPUBufferUsage.COPY_DST });
+      device.queue.writeBuffer(vb, 0, vArr.buffer, vArr.byteOffset, vArr.byteLength);
+
+      ib = device.createBuffer({ size: iArr.byteLength, usage: GPUBufferUsage.INDEX | GPUBufferUsage.COPY_DST });
+      device.queue.writeBuffer(ib, 0, iArr.buffer, iArr.byteOffset, iArr.byteLength);
+
+      // rebuild deduplicated line indices
+      const edgeSet2 = new Set<string>();
+      const lineIdx2: number[] = [];
+      for (let t = 0; t < iArr.length; t += 3) {
+        const a = iArr[t], b = iArr[t+1], c = iArr[t+2];
+        const edges = [[a,b],[b,c],[c,a]];
+        for (const [x,y] of edges) {
+          const mn = x < y ? x : y;
+          const mx = x < y ? y : x;
+          const key = mn + ',' + mx;
+          if (!edgeSet2.has(key)) { edgeSet2.add(key); lineIdx2.push(mn, mx); }
+        }
+      }
+
+      const lineArr2 = new Uint32Array(lineIdx2);
+      ibLine = device.createBuffer({ size: lineArr2.byteLength, usage: GPUBufferUsage.INDEX | GPUBufferUsage.COPY_DST });
+      device.queue.writeBuffer(ibLine, 0, lineArr2.buffer, lineArr2.byteOffset, lineArr2.byteLength);
+      lineIndexCount = lineArr2.length;
+
+      // update counts
+      // indexCount variable is const above; replace by writing to outer-scoped variable via closure
+      indexCount = iArr.length;
+      // store the last-used values
+      lastRadial = newRadial;
+      lastTubular = newTubular;
+      if (isDev) console.info('[sphere-renderer] regenerated geometry', { newRadial, newTubular, indexCount: iArr.length, lineIndexCount: lineArr2.length });
+    } catch (err) {
+      if (isDev) console.warn('[sphere-renderer] failed to regenerate geometry', err);
+    }
+  }
+
+  const UNIFORM_SIZE = 4 * (16 + 16 + 4 + 4 + 4 + 4); // 2× mat4 + 4× vec4 (lightPos, viewPos, tint, params)
   const ub = device.createBuffer({
     size: UNIFORM_SIZE,
     usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
@@ -325,6 +459,42 @@ export async function initSphereRenderer(canvas: HTMLCanvasElement): Promise<() 
       depthWriteEnabled: true,
       depthCompare: 'less',
     },
+  });
+
+  // --- Wireframe pipeline (line-list) -----------------------------------
+  // Simple shader module for lines: output a solid ink colour from tint.yzw
+  const LINE_SHADER = /* wgsl */ `
+struct Uniforms { mvp: mat4x4<f32>, model: mat4x4<f32>, lightPos: vec4<f32>, viewPos: vec4<f32>, tint: vec4<f32>, params: vec4<f32>, }
+@group(0) @binding(0) var<uniform> u : Uniforms;
+
+struct VIn { @location(0) position : vec3<f32>, @location(1) normal : vec3<f32>, }
+struct VOut { @builtin(position) clipPos : vec4<f32>, }
+
+@vertex
+fn vs_main(v : VIn) -> VOut {
+  var out : VOut;
+  out.clipPos = u.mvp * vec4<f32>(v.position, 1.0);
+  return out;
+}
+
+@fragment
+fn fs_main() -> @location(0) vec4<f32> {
+  let ink = u.tint.yzw;
+  return vec4<f32>(ink, 1.0);
+}
+`;
+
+  const lineShader = device.createShaderModule({ code: LINE_SHADER });
+  const pipelineLine = device.createRenderPipeline({
+    layout: device.createPipelineLayout({ bindGroupLayouts: [bgl] }),
+    vertex: {
+      module: lineShader,
+      entryPoint: 'vs_main',
+      buffers: [{ arrayStride: 6 * 4, attributes: [ { shaderLocation: 0, offset: 0, format: 'float32x3' }, { shaderLocation: 1, offset: 3 * 4, format: 'float32x3' } ] }],
+    },
+    fragment: { module: lineShader, entryPoint: 'fs_main', targets: [{ format, blend: { color: { srcFactor: 'src-alpha', dstFactor: 'one-minus-src-alpha', operation: 'add' }, alpha: { srcFactor: 'one', dstFactor: 'one-minus-src-alpha', operation: 'add' } } }] },
+    primitive: { topology: 'line-list', cullMode: 'none' },
+    depthStencil: { format: 'depth24plus', depthWriteEnabled: true, depthCompare: 'less' },
   });
 
   // ── Resize handler ───────────────────────────────────────────────────────────
@@ -451,15 +621,23 @@ export async function initSphereRenderer(canvas: HTMLCanvasElement): Promise<() 
     const model     = mat4Mul(cursorMat, autoModel);
     const mvp       = mat4Mul(mat4Mul(proj, view), model);
 
-    const { opacity, color } = backgroundFilter;
-    // pack uniforms: mvp (16), model (16), lightPos (4), viewPos (4), tint (4)
-    const uniforms = new Float32Array(16 + 16 + 4 + 4 + 4);
+    const { opacity, color, ditherDensity } = backgroundFilter;
+    // pack uniforms: mvp (16), model (16), lightPos (4), viewPos (4), tint (4), params (4)
+    const uniforms = new Float32Array(16 + 16 + 4 + 4 + 4 + 4);
     uniforms.set(mvp,   0);
     uniforms.set(model, 16);
     uniforms.set([3.0, 4.0, 3.0, 1.0],              32);
     uniforms.set([...eye, 1.0],                      36);
     uniforms.set([opacity, color[0], color[1], color[2]], 40);
+    uniforms.set([ditherDensity ?? 0.45, 0, 0, 0], 44);
     queue.writeBuffer(ub, 0, uniforms);
+
+    // If a page changed the target geometry resolution, regenerate buffers now.
+    const curRadial = backgroundFilter.radialSegments ?? 64;
+    const curTubular = backgroundFilter.tubularSegments ?? 32;
+    if (curRadial !== lastRadial || curTubular !== lastTubular) {
+      regenerateGeometry(curRadial, curTubular);
+    }
 
     const frameView = context.getCurrentTexture().createView();
     const enc   = device.createCommandEncoder();
@@ -479,11 +657,20 @@ export async function initSphereRenderer(canvas: HTMLCanvasElement): Promise<() 
       },
     });
 
-    rp.setPipeline(pipeline);
-    rp.setBindGroup(0, bg);
-    rp.setVertexBuffer(0, vb);
-    rp.setIndexBuffer(ib, 'uint32');
-    rp.drawIndexed(indexCount);
+    // Choose rendering style per the live backgroundFilter
+    if (backgroundFilter.style === 'wireframe') {
+      rp.setPipeline(pipelineLine);
+      rp.setBindGroup(0, bg);
+      rp.setVertexBuffer(0, vb);
+      rp.setIndexBuffer(ibLine, 'uint32');
+      rp.drawIndexed(lineIndexCount);
+    } else {
+      rp.setPipeline(pipeline);
+      rp.setBindGroup(0, bg);
+      rp.setVertexBuffer(0, vb);
+      rp.setIndexBuffer(ib, 'uint32');
+      rp.drawIndexed(indexCount);
+    }
     rp.end();
 
     queue.submit([enc.finish()]);
