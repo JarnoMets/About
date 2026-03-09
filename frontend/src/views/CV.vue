@@ -192,59 +192,60 @@ function downloadPdf(): void {
 .cv-document {
   width: 100%;
   min-height: 900px;
-  background: #f5f0e8; /* warm parchment – matches the original */
-  color: #1a1a1a;
+  /* Dark modern theme for on-screen viewing. Keep print rules intact. */
+  background: linear-gradient(180deg, #0b0f14 0%, #0f1318 100%);
+  color: #e6eef8;
   font-family: 'Inter', system-ui, sans-serif;
   font-size: 11px;
   line-height: 1.55;
-  box-shadow: 0 8px 40px rgba(0,0,0,0.45);
-  border-radius: 4px;
+  box-shadow: 0 8px 40px rgba(0,0,0,0.6);
+  border-radius: 6px;
   overflow: hidden;
 }
 
 /* ─── Header band ────────────────────────────────────────────────────────── */
 .cv-header {
-  background: #f5f0e8;
+  background: transparent;
   padding: 2rem 2.5rem 1rem;
-  border-bottom: 6px solid #6b2d00;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
 }
 
 .cv-name {
-  font-size: 2.6rem;
+  font-size: 2.4rem;
   font-weight: 800;
-  color: #1a1a1a;
+  color: #eaf3ff;
   letter-spacing: -0.02em;
-  line-height: 1.1;
-  margin-bottom: 0.3rem;
+  line-height: 1.05;
+  margin-bottom: 0.25rem;
 }
 
 .cv-job-title {
-  background: #6b2d00;
-  color: #f5f0e8;
+  background: linear-gradient(90deg,#3755ff 0%, #1ed6c4 100%);
+  color: #061022;
   display: inline-block;
-  padding: 0.3rem 1rem;
-  font-size: 0.78rem;
-  font-weight: 600;
+  padding: 0.28rem 0.9rem;
+  font-size: 0.72rem;
+  font-weight: 700;
   letter-spacing: 0.12em;
   text-transform: uppercase;
-  border-radius: 2px;
+  border-radius: 4px;
 }
 
 /* ─── Two-column body ────────────────────────────────────────────────────── */
 .cv-body {
   display: grid;
-  grid-template-columns: 220px 1fr;
+  grid-template-columns: 240px 1fr;
   min-height: calc(900px - 110px);
 }
 
 .cv-sidebar {
-  background: #e8e0d0;
-  padding: 1.5rem 1.2rem 1.5rem 1.5rem;
-  border-right: 1px solid #d0c8b8;
+  background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+  padding: 1.6rem 1.2rem 1.6rem 1.6rem;
+  border-right: 1px solid rgba(255,255,255,0.03);
 }
 
 .cv-main {
-  background: #f5f0e8;
+  background: transparent;
   padding: 1.5rem 1.8rem 1.5rem 1.5rem;
 }
 
@@ -254,18 +255,18 @@ function downloadPdf(): void {
 }
 
 .section-title {
-  font-size: 1rem;
+  font-size: 0.98rem;
   font-weight: 700;
-  color: #1a1a1a;
+  color: #dbeafc;
   margin-bottom: 0.6rem;
   padding-bottom: 0.2rem;
-  border-bottom: 2px solid #6b2d00;
+  border-bottom: 2px solid rgba(255,255,255,0.03);
 }
 
 /* Profile */
 .profile-text {
   font-size: 0.78rem;
-  color: #333;
+  color: #cfe6ff;
   text-align: justify;
 }
 
@@ -274,16 +275,17 @@ function downloadPdf(): void {
   display: block;
   font-size: 0.82rem;
   font-weight: 700;
+  color: #eaf3ff;
 }
 .education-entry p {
   font-size: 0.75rem;
-  color: #444;
+  color: #cbdff8;
   margin: 0.1rem 0;
 }
 .period {
   font-size: 0.72rem;
   font-weight: 700;
-  color: #6b2d00;
+  color: #6ecfff;
 }
 
 /* Skills */
@@ -299,13 +301,13 @@ function downloadPdf(): void {
   font-size: 0.78rem;
   padding-left: 0.8rem;
   position: relative;
-  color: #222;
+  color: #d6e9ff;
 }
 .skills-list li::before {
   content: '•';
   position: absolute;
   left: 0;
-  color: #6b2d00;
+  color: #4ad3ff;
 }
 
 /* Timeline entries (jobs, projects) */
@@ -322,18 +324,18 @@ function downloadPdf(): void {
 .entry-period {
   font-size: 0.72rem;
   font-weight: 700;
-  color: #6b2d00;
+  color: #4ad3ff;
   white-space: nowrap;
 }
 .entry-company {
   font-size: 0.82rem;
   font-weight: 700;
-  color: #1a1a1a;
+  color: #eaf3ff;
 }
 .entry-role {
   font-size: 0.78rem;
   font-weight: 600;
-  color: #444;
+  color: #cfe6ff;
   margin-bottom: 0.3rem;
 }
 .entry-bullets {
@@ -342,7 +344,7 @@ function downloadPdf(): void {
 }
 .entry-bullets li {
   font-size: 0.76rem;
-  color: #333;
+  color: #cbdff8;
   margin-bottom: 0.2rem;
   text-align: justify;
 }
@@ -361,18 +363,18 @@ function downloadPdf(): void {
   align-items: center;
   gap: 0.5rem;
   font-size: 0.77rem;
-  color: #222;
+  color: #d9efff;
 }
 .contact-list svg {
   flex-shrink: 0;
-  color: #6b2d00;
+  color: #4ad3ff;
 }
 .contact-list a {
-  color: #222;
+  color: #d9efff;
   text-decoration: none;
 }
 .contact-list a:hover {
-  color: #6b2d00;
+  color: #7fe6ff;
 }
 
 /* ─── Print / PDF styles ─────────────────────────────────────────────────── */
