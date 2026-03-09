@@ -1,0 +1,58 @@
+{
+  "cv": {
+    "title": "CV",
+    "download_pdf": "PDF Downloaden",
+    "profile_title": "Profiel",
+    "profile_text": "Software developer met een passie voor probleemoplossen en optimalizatie. Ik hou van bijleren over nieuwe technologieën en technieken.",
+    "education_title": "Opleiding",
+    "education_school": "Thomas More",
+    "education_degree": "Prof. Bachelor Electronica-ICT: Embedded Software",
+    "education_period": "2018 – 2022",
+    "skills_title": "Skills",
+    "projects_title": "Projecten",
+    "projects": [
+      {
+        "year": "2021",
+        "name": "Handheld console",
+        "bullets": [
+          "Python applicatie compileert custom assembly gebaseerde taal naar geformatteerde binairy code",
+          "Dit bestand kan dan worden geupload naar de console over USB",
+          "In C geschreven interpreter, leest de binaire code en voert deze uit"
+        ]
+      }
+    ],
+    "current_title": "Huidig",
+    "experience_title": "Ervaring",
+    "current": [
+      {
+        "period": "2023 – Nu",
+        "company": "Abylsen",
+        "role": "Consultant Bij CNH",
+        "bullets": [
+          "Verzorgen van communicatie met digitale tooling. OpenProtocol, Modbus/TCP, Keyence Non-procedural (TCP/ip stack).",
+          "Aangepaste dagelijkse rapporten met eigen code.",
+          "Aangepaste software voor specifieke ingenieurs projecten. Bijvoorbeeld metingen met verschillende tooling en hierop berekeningen toegepast.",
+          "Database queries voor zowel rapportering als versnelde configuratie."
+        ]
+      }
+    ],
+    "experience": [
+      {
+        "period": "2022",
+        "company": "Verhaert",
+        "role": "Stage",
+        "bullets": [
+          "Back-end oplossingen zoeken en verder onderzoeken om over-the-air updates uit te voeren.",
+          "Front-end oplossingen zoeken en verder onderzoeken om zowel embedded-linux als low-end embedded systemen over-the-air te updaten."
+        ]
+      }
+    ],
+    "contact_title": "Contact",
+    "contact_website": "jarnomets.com",
+    "contact_phone": "+32 491 55 46 49",
+    "contact_email": "info@jarnomets.com",
+    "contact_github": "github.com/JarnoMets",
+    "contact_linkedin": "linkedin.com/in/jarno-mets-763525242/",
+    "contact_location": "Lint, Antwerpen"
+  }
+}
