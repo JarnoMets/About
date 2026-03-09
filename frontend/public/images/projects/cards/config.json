@@ -1,0 +1,19 @@
+{
+  "thumbnail": "index.png",
+  "images": [
+    {
+      "file": "index.png",
+      "caption": "Cards index"
+    },
+    {
+      "file": "setup.png",
+      "caption": "Setup Hearts"
+    }
+  ],
+  "slideshow": {
+    "autoTransition": true,
+    "autoTransitionInterval": 4000,
+    "showCaptions": true,
+    "showThumbnailStrip": true
+  }
+}
