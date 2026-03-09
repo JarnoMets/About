@@ -18,14 +18,15 @@ export interface BackgroundFilter {
 }
 
 const DEFAULT_FILTER: BackgroundFilter = {
-  speed:   1.0,
-  /** Controls dither dot density: higher = more ink pixels visible */
-  opacity: 0.55,
-  color:   [0.55, 0.75, 1.0],
-  style:  'wireframe',
-  ditherDensity: 0.45,
-  radialSegments: 64,
-  tubularSegments: 32,
+  speed:         1.0,
+  opacity:       0.55,
+  color:         [0.55, 0.75, 1.0],
+  // Default to dither (dot style) — matches the home page and the live site.
+  // Individual pages override this via useBackground().
+  style:         'dither',
+  ditherDensity: 0.38,
+  radialSegments: 70,
+  tubularSegments: 50,
 };
 
 /** Live filter – mutate its fields to change the look without restarting. */

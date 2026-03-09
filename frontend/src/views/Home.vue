@@ -1,4 +1,7 @@
 <template>
+  <!-- Home page owns its own full-screen canvas for the 2D dot renderer -->
+  <canvas ref="dotCanvas" class="home-canvas" aria-hidden="true" />
+
   <div class="home">
     <section class="hero">
       <h1 class="hero-title">Jarno Mets</h1>
@@ -12,23 +15,33 @@
 </template>
 
 <script setup lang="ts">
-import { useBackground } from '@/composables/useBackground';
+import { ref, onMounted, onUnmounted } from 'vue';
+import { initBackgroundRenderer } from '@/utils/background-renderer';
 
-// Match live site: cool-blue dither dots at the same density / tone as the
-// Canvas-2D renderer that ships on about.jarnomets.com.
-// R=1.2, r=0.45, 70×50 segments, color=[0.55,0.75,1.0], opacity≈0.55
-useBackground({
-  style: 'dither',
-  ditherDensity: 0.38,       // light dot spread — matches live-site midtone density
-  radialSegments: 70,
-  tubularSegments: 50,
-  speed: 1.0,
-  opacity: 0.55,
-  color: [0.55, 0.75, 1.0], // exact live-site cool-blue
+const dotCanvas = ref<HTMLCanvasElement | null>(null);
+let cleanup: (() => void) | null = null;
+
+onMounted(() => {
+  if (dotCanvas.value) {
+    cleanup = initBackgroundRenderer(dotCanvas.value);
+  }
+});
+
+onUnmounted(() => {
+  cleanup?.();
 });
 </script>
 
 <style scoped>
+.home-canvas {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -1;
+  pointer-events: none;
+}
+
 .home {
   min-height: calc(100vh - 4rem);
   display: flex;
