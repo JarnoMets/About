@@ -143,15 +143,17 @@ import { useBackground } from '@/composables/useBackground';
 
 const { t, tm } = useI18n();
 
-// Unique CV torus: slow wireframe in warm amber/gold, thinner tube,
-// giving a technical "blueprint" feel that contrasts with the home page.
+// CV torus: same cool-blue as home page, but noise-dither style –
+// denser than wireframe, more organic than Bayer ordered-dither.
+// Slow rotation so it's calm behind the document.
 useBackground({
-  style: 'wireframe',
-  speed: 0.35,
-  opacity: 0.70,
-  color: [0.95, 0.72, 0.28],   // warm amber-gold
-  radialSegments: 48,
-  tubularSegments: 24,
+  style: 'noise-dither',
+  speed: 0.4,
+  opacity: 0.52,
+  ditherDensity: 0.55,
+  color: [0.55, 0.75, 1.0],   // same cool-blue as home
+  radialSegments: 64,
+  tubularSegments: 32,
 });
 
 interface CvJob {
@@ -429,6 +431,10 @@ function downloadPdf(): void {
     box-shadow: none;
     border-radius: 0;
     font-size: 10.5px;
+    /* Force the dark background + colours to actually print */
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+    color-adjust: exact;
   }
   .no-print {
     display: none !important;
