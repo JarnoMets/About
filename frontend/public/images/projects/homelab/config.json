@@ -1,0 +1,15 @@
+{
+  "thumbnail": "thumbnail.jpg",
+  "images": [
+    {
+      "file": "thumbnail.jpg",
+      "caption": "Homelab overview"
+    }
+  ],
+  "slideshow": {
+    "autoTransition": true,
+    "autoTransitionInterval": 4000,
+    "showCaptions": true,
+    "showThumbnailStrip": true
+  }
+}

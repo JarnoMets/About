@@ -1,0 +1,15 @@
+{
+  "thumbnail": "thumbnail.jpg",
+  "images": [
+    {
+      "file": "thumbnail.jpg",
+      "caption": "musicApp screenshot"
+    }
+  ],
+  "slideshow": {
+    "autoTransition": true,
+    "autoTransitionInterval": 4000,
+    "showCaptions": true,
+    "showThumbnailStrip": true
+  }
+}
