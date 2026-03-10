@@ -5,7 +5,7 @@ metadata:
   namespace: about
 type: Opaque
 stringData:
-  DATABASE_URL: "postgresql://about_user:changeme@postgres.about-db.svc.cluster.local:5432/about_db"
+  DATABASE_URL: "postgresql://about_user:your-password-here@postgres.about-db.svc.cluster.local:5432/about_db"
   HOST: "0.0.0.0"
   PORT: "8080"
 ---
