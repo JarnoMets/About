@@ -104,18 +104,6 @@ const projects: Project[] = [
     github: 'https://github.com/JarnoMets/AndroidMusicViewer'
   },
   {
-    id: 'hitster',
-    icon: 'HT',
-    url: 'https://hitster.jarnomets.com',
-    github: 'https://github.com/JarnoMets/Hitster'
-  },
-  {
-    id: 'stocks',
-    icon: 'ST',
-    url: 'https://stocks.jarnomets.com',
-    github: 'https://github.com/JarnoMets/Stocks'
-  },
-  {
     id: 'kholisa32',
     icon: 'K32',
     github: 'https://github.com/JarnoMets/Kholisa32'

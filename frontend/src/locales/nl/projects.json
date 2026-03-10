@@ -144,46 +144,6 @@
             "targets": "Android (APK) / Desktop"
         }
     },
-    "hitster": {
-        "name": "Hitster",
-        "shortDescription": "Een multiplayer muziek-tijdlijn raadspel waarbij teams strijden om nummers in chronologische volgorde te plaatsen, aangedreven door de MusicServer-bibliotheek.",
-        "description": "Een realtime multiplayer muziekquiz-spel geïnspireerd op het Hitster-bordspel. Teams luisteren om de beurt naar nummers uit samengestelde pakketten gebouwd vanuit de MusicServer-bibliotheek en moeten elk nummer op de juiste positie op hun chronologische tijdlijn plaatsen. Spelers horen alleen een audiofragment en moeten raden waar het nummer past ten opzichte van de nummers die ze al hebben geplaatst. Correcte plaatsingen leveren punten op; foute plaatsingen geven de beurt door aan het volgende team. Het eerste team dat de doelscore bereikt wint. Bevat pakketcreatie en -bewerking, teambeheer, configureerbare wincondities en een vinyl-thema UI.",
-        "features": {
-            "f1": "Teamgebaseerd multiplayer met configureerbare teamnamen en spelersaantal",
-            "f2": "Nummerpakketten gebouwd vanuit de MusicServer-bibliotheek met bladeren en bewerken",
-            "f3": "Interactieve tijdlijn met drag-and-drop nummerplaatsing",
-            "f4": "Audio-afspelen van mysterienummers tijdens het spel",
-            "f5": "Configureerbaar windoel (standaard 10 correcte plaatsingen)",
-            "f6": "Vinyl-thema UI met geanimeerde platenspinners en beurtindicatoren"
-        },
-        "stack": {
-            "backend": "Rust / Actix-web 4 / SQLx",
-            "database": "PostgreSQL 15",
-            "frontend": "Vue 3 / TypeScript / Vite / Vue Router",
-            "integration": "MusicServer API voor nummerstreaming en metadata",
-            "deployment": "Docker Compose / Kubernetes (k3s)"
-        }
-    },
-    "stocks": {
-        "name": "Aandelen",
-        "shortDescription": "Een zelfgehoste aandelenportefeuilletracker met benchmarkvergelijkingen, technische analyse, live koersen en belastingberekeningstools.",
-        "description": "Een uitgebreide aandelenportefeuille-beheer applicatie voor het bijhouden van beleggingen, het monitoren van prestaties ten opzichte van marktbenchmarks en het voorbereiden van gegevens voor belastingaangiften. Bekijk uitgebreide aandelengegevens waaronder live koersen, belangrijke statistieken, bedrijfsprofielen, koersgeschiedenisgrafieken en technische analyse-indicatoren. Vergelijk individuele aandelen met configureerbare benchmarks (S&P 500, NASDAQ, enz.). Beheer transacties met koop-/verkooptracking en bereken vermogenswinsten voor belastingdoeleinden. Bevat gebruikersauthenticatie met registratie en login, ondersteuning voor meerdere portefeuilles en een responsief donker/licht thema.",
-        "features": {
-            "f1": "Portefeuilleoverzicht met totale waarde, winst/verlies en allocatieverdeling",
-            "f2": "Live aandelenkoersen met realtime prijs- en wijzigingsgegevens",
-            "f3": "Interactieve koersgeschiedenisgrafieken met configureerbare datumbereiken",
-            "f4": "Technische analyse-indicatoren en belangrijke statistieken",
-            "f5": "Benchmarkvergelijking met marktindices (S&P 500, NASDAQ, enz.)",
-            "f6": "Transactiebeheer met koop-/verkooptracking en vermogenswinstberekening",
-            "f7": "Gebruikersauthenticatie met sessiegebaseerde login en registratie"
-        },
-        "stack": {
-            "backend": "Rust / Actix-web 4 / SQLx",
-            "database": "PostgreSQL 15",
-            "frontend": "Vue 3 / TypeScript / Vite / Chart.js / Pinia",
-            "deployment": "Docker Compose / Kubernetes (k3s)"
-        }
-    },
     "kholisa32": {
         "name": "Kholisa-32",
         "shortDescription": "Een zelfgebouwde draagbare gameconsole op basis van een STM32F746NG-microcontroller, met een eigen bytecode virtuele machine en rendering op een 4,3\" 480x272 lcd met touchinput.",

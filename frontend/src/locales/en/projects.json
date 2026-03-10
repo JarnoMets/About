@@ -144,46 +144,6 @@
             "targets": "Android (APK) / Desktop"
         }
     },
-    "hitster": {
-        "name": "Hitster",
-        "shortDescription": "A multiplayer music timeline guessing game where teams compete to place songs in chronological order, powered by the MusicServer library.",
-        "description": "A real-time multiplayer music trivia game inspired by the Hitster board game. Teams take turns listening to songs from curated packs built from the MusicServer library and must place each song in the correct position on their chronological timeline. Players hear only an audio snippet and have to guess where the song fits relative to the tracks they have already placed. Correct placements earn points; wrong placements pass the turn to the next team. The first team to reach the target score wins. Includes pack creation and editing, team management, configurable win conditions, and a vinyl-themed UI.",
-        "features": {
-            "f1": "Team-based multiplayer with configurable team names and player count",
-            "f2": "Song packs built from the MusicServer library with browsing and editing",
-            "f3": "Interactive timeline with drag-and-drop song placement",
-            "f4": "Audio playback of mystery songs during gameplay",
-            "f5": "Configurable win target (default 10 correct placements)",
-            "f6": "Vinyl-themed UI with animated record spinners and turn indicators"
-        },
-        "stack": {
-            "backend": "Rust / Actix-web 4 / SQLx",
-            "database": "PostgreSQL 15",
-            "frontend": "Vue 3 / TypeScript / Vite / Vue Router",
-            "integration": "MusicServer API for track streaming and metadata",
-            "deployment": "Docker Compose / Kubernetes (k3s)"
-        }
-    },
-    "stocks": {
-        "name": "Stocks",
-        "shortDescription": "A self-hosted stock portfolio tracker with benchmark comparisons, technical analysis, live quotes, and tax calculation tools.",
-        "description": "A full-featured stock portfolio management application for tracking investments, monitoring performance against market benchmarks, and preparing data for tax filings. View comprehensive stock data including live quotes, key statistics, company profiles, price history charts, and technical analysis indicators. Compare individual stocks against configurable benchmarks (S&P 500, NASDAQ, etc.). Manage transactions with buy/sell tracking and calculate capital gains for tax purposes. Includes user authentication with registration and login, multiple portfolio support, and a responsive dark/light theme.",
-        "features": {
-            "f1": "Portfolio overview with total value, gain/loss, and allocation breakdown",
-            "f2": "Live stock quotes with real-time price and change data",
-            "f3": "Interactive price history charts with configurable date ranges",
-            "f4": "Technical analysis indicators and key statistics",
-            "f5": "Benchmark comparison against market indices (S&P 500, NASDAQ, etc.)",
-            "f6": "Transaction management with buy/sell tracking and capital gains calculation",
-            "f7": "User authentication with session-based login and registration"
-        },
-        "stack": {
-            "backend": "Rust / Actix-web 4 / SQLx",
-            "database": "PostgreSQL 15",
-            "frontend": "Vue 3 / TypeScript / Vite / Chart.js / Pinia",
-            "deployment": "Docker Compose / Kubernetes (k3s)"
-        }
-    },
     "kholisa32": {
         "name": "Kholisa-32",
         "shortDescription": "A custom handheld game console built around an STM32F746NG microcontroller, running a custom bytecode virtual machine and rendering games on a 4.3\" 480x272 LCD with touch input.",
